@@ -108,8 +108,8 @@ vector<double> getFrenet(double x, double y, double theta,
   //see if d value is positive or negative by comparing it to a center point
   double center_x = 1000-maps_x[prev_wp];
   double center_y = 2000-maps_y[prev_wp];
-  double centerToPos = distance(center_x,center_y,x_x,x_y);
-  double centerToRef = distance(center_x,center_y,proj_x,proj_y);
+  double centerToPos = distance(center_x, center_y, x_x, x_y);
+  double centerToRef = distance(center_x, center_y, proj_x, proj_y);
 
   if (centerToPos <= centerToRef) {
     frenet_d *= -1;
@@ -118,12 +118,12 @@ vector<double> getFrenet(double x, double y, double theta,
   // calculate s value
   double frenet_s = 0;
   for (int i = 0; i < prev_wp; ++i) {
-    frenet_s += distance(maps_x[i],maps_y[i],maps_x[i+1],maps_y[i+1]);
+    frenet_s += distance(maps_x[i], maps_y[i], maps_x[i+1], maps_y[i+1]);
   }
 
-  frenet_s += distance(0,0,proj_x,proj_y);
+  frenet_s += distance(0, 0, proj_x, proj_y);
 
-  return {frenet_s,frenet_d};
+  return {frenet_s, frenet_d};
 }
 
 // Transform from Frenet s,d coordinates to Cartesian x,y
