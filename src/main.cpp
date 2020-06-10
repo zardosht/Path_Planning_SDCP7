@@ -142,6 +142,12 @@ int main() {
               {
                 std::cout << "****************** too close!" << std::endl;
                 too_close = true;
+
+                // change lane
+                if (lane > 0) 
+                {
+                  lane = 0;
+                }
               } 
             }
           }
@@ -158,8 +164,6 @@ int main() {
           {
             ref_vel += 0.224;
           }
-
-
 
 
           vector<double> ptsx;
