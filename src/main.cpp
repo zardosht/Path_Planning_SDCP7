@@ -53,7 +53,7 @@ int main() {
   }
 
   int lane = 1;
-  double ref_vel = 49.5;  //mph
+  double ref_vel = 0.0;  //mph
 
   h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
                &map_waypoints_dx,&map_waypoints_dy, &lane, &ref_vel]
@@ -138,24 +138,25 @@ int main() {
               double distance = check_car_s - car_s;
               // if the car is front of us (distance > 0) and our 
               // distance is less than allowed gap
-              if (distance > 0) 
+              if (distance > 0 && distance < gap) 
               {
-                if (distance < gap) 
-                { 
-                  too_close = true;
-                  std::cout << "****************** too close!" << std::endl;
-                  // reduce speed
-                  ref_vel = 5.5; //mph
-                } 
-                else 
-                {
-                  too_close = false;
-                  std::cout << "*** no more too close!" << distance << std::endl;
-                  // reduce speed
-                  ref_vel = 49.5; //mph
-                }
+                std::cout << "****************** too close!" << std::endl;
+                too_close = true;
               } 
             }
+          }
+
+          // gradually decreas or increase the speed
+          // to avoid jerk (both at the beginning and
+          // when we are behind a car in our lane)
+          if (too_close) 
+          {
+            // 0.224 roughly corresponds to 5 m/s^2 acceleration
+            ref_vel -= 0.224;
+          }
+          else if (ref_vel < 49.5)
+          {
+            ref_vel += 0.224;
           }
 
 
@@ -268,6 +269,7 @@ int main() {
 
           }
 
+          // // keep the lane and go forward
           // double dist_inc = 0.4;
           // for (int i = 0; i < 50; ++i) {
           //   double next_s = car_s + (i + 1) * dist_inc;
