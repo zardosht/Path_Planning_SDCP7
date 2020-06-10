@@ -173,6 +173,13 @@ int main() {
           double ref_y = car_y;
           double ref_yaw = deg2rad(car_yaw);
 
+          // Beginning points for the current path.
+          // Either take the corrent position of the car
+          // (if the previous path is consumed, i.e. 
+          // prev_size < 2), or take the last two points
+          // from the previous path.
+          // This helps in a smooth transition from 
+          // previous path to the current path
           if(prev_size < 2) 
           {
             double prev_car_x = car_x - cos(car_yaw);
@@ -201,6 +208,7 @@ int main() {
             ptsy.push_back(ref_y);
           }
 
+          // 
           vector<double> next_wp0 = getXY(car_s + 30, 
                                           (2.0 + 4.0 * lane), 
                                           map_waypoints_s, 
@@ -224,6 +232,11 @@ int main() {
           ptsy.push_back(next_wp1[1]);
           ptsy.push_back(next_wp2[1]);
 
+          // transform the points in the ego car's 
+          // coordinate system (the beginning point 
+          // becomes (0, 0) and the beginnign yaw becomes
+          // 0 degrees and the rest of the points are 
+          // transformed accordingly)
           for(int i = 0; i < ptsx.size(); ++i)
           {
             double shift_x = ptsx[i] - ref_x;
@@ -234,12 +247,14 @@ int main() {
 
           }
           
-          tk::spline s;
-          s.set_points(ptsx, ptsy);
+          tk::spline spl;
+          spl.set_points(ptsx, ptsy);
 
           vector<double> next_x_vals;
           vector<double> next_y_vals;
 
+          // add the points from previous path to the 
+          // beginning of current path
           for(int i = 0; i < previous_path_x.size(); ++i)
           {
             next_x_vals.push_back(previous_path_x[i]);
@@ -247,16 +262,18 @@ int main() {
           }
 
           double target_x = 30.0; //horizon
-          double target_y = s(target_x);
+          double target_y = spl(target_x);
           double target_dist = sqrt(target_x * target_x + target_y * target_y);
 
           double x_add_on = 0;
 
+          // fill the rest of current path (till we have 50 points)
+          // with the points interpolated by the spline
           for(int i = 1; i <= 50 - previous_path_x.size(); i++) 
           {
             double N = target_dist / (0.02 * ref_vel / 2.24);
             double x_point = x_add_on + target_x / N;
-            double y_point = s(x_point);
+            double y_point = spl(x_point);
 
             x_add_on = x_point;
             double x_ref = x_point;
@@ -272,21 +289,6 @@ int main() {
             next_y_vals.push_back(y_point);
 
           }
-
-          // // keep the lane and go forward
-          // double dist_inc = 0.4;
-          // for (int i = 0; i < 50; ++i) {
-          //   double next_s = car_s + (i + 1) * dist_inc;
-          //   double next_d = 6; 
-            
-          //   vector<double> xy = getXY(next_s, next_d, 
-          //                             map_waypoints_s, 
-          //                             map_waypoints_x, 
-          //                             map_waypoints_y);
-            
-          //   next_x_vals.push_back(xy[0]);
-          //   next_y_vals.push_back(xy[1]);
-          // }
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
