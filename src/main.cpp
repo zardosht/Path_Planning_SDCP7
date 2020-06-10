@@ -138,12 +138,23 @@ int main() {
               double distance = check_car_s - car_s;
               // if the car is front of us (distance > 0) and our 
               // distance is less than allowed gap
-              if (distance > 0 && distance < gap)
-              { 
-                too_close = true;
-                // reduce speed
-                ref_vel = 29.5; //mph
-              }
+              if (distance > 0) 
+              {
+                if (distance < gap) 
+                { 
+                  too_close = true;
+                  std::cout << "****************** too close!" << std::endl;
+                  // reduce speed
+                  ref_vel = 5.5; //mph
+                } 
+                else 
+                {
+                  too_close = false;
+                  std::cout << "*** no more too close!" << distance << std::endl;
+                  // reduce speed
+                  ref_vel = 49.5; //mph
+                }
+              } 
             }
           }
 
