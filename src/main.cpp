@@ -7,7 +7,6 @@
 
 #include "helpers.h"
 #include "json.hpp"
-#include "spline.h"
 
 #include "map.h"
 #include "behavior_planner.h"
@@ -87,18 +86,10 @@ int main() {
           
           Behavior behavior = bp.next_behavior();
 
-
-          Trajectory trajectory = tg.generate_trajectory(behavior, ego_car);
-
-          // vector<double> next_x_vals;
-          // vector<double> next_y_vals;
-
-          // double dist_inc = 0.5;
-          // for (int i = 0; i < 50; ++i)
-          // {
-          //   next_x_vals.push_back(car_x + (i * dist_inc) * cos(deg2rad(car_yaw)));
-          //   next_y_vals.push_back(car_y + (i * dist_inc) * sin(deg2rad(car_yaw)));
-          // }
+          Trajectory previous_path;
+          previous_path.xs.assign(previous_path_x.begin(), previous_path_x.end());
+          previous_path.ys.assign(previous_path_y.begin(), previous_path_y.end());
+          Trajectory trajectory = tg.generate_trajectory(behavior, ego_car, previous_path);
 
 
           msgJson["next_x"] = trajectory.xs;

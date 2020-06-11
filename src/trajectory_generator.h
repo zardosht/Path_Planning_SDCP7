@@ -16,6 +16,7 @@ struct Trajectory
 {
     vector<double> xs;
     vector<double> ys;
+    int size() {return xs.size();}
 };
 
 class TrajectoryGenerator 
@@ -28,7 +29,7 @@ class TrajectoryGenerator
         ~TrajectoryGenerator();
 
         // functions
-        Trajectory generate_trajectory(Behavior behavior, Vehicle& vehicle);
+        Trajectory generate_trajectory(Behavior behavior, Vehicle& vehicle, Trajectory previous_path);
 
         // variables
 
