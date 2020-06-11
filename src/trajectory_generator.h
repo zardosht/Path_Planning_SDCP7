@@ -3,8 +3,13 @@
 
 #include <vector>
 #include "behavior_planner.h"
+#include "vehicle.h"
+
 
 using std::vector;
+
+const double DISTANCE_INCREMENT = 0.5;
+const int NUM_TRAJECTORY_POINTS = 50;
 
 struct Trajectory  
 {
@@ -22,7 +27,7 @@ class TrajectoryGenerator
         ~TrajectoryGenerator();
 
         // functions
-        Trajectory generate_trajectory(State state);
+        Trajectory generate_trajectory(State state, Vehicle& vehicle);
 
         // variables
 
