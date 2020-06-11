@@ -9,6 +9,8 @@
 #include "json.hpp"
 #include "spline.h"
 
+#include "behavior_planner.h"
+
 
 // for convenience
 using nlohmann::json;
@@ -17,6 +19,8 @@ using std::vector;
 
 int main() {
   uWS::Hub h;
+
+  BehaviorPlanner behavior_planner(3);
 
   // Load up map values for waypoint's x,y,s and d normalized normal vectors
   vector<double> map_waypoints_x;
