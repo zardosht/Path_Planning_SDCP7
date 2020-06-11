@@ -4,6 +4,7 @@
 #include <vector>
 #include "behavior_planner.h"
 #include "vehicle.h"
+#include "map.h"
 
 
 using std::vector;
@@ -21,7 +22,7 @@ class TrajectoryGenerator
 {
     public:
         // constructor
-        TrajectoryGenerator();
+        TrajectoryGenerator(Map& map);
 
         // destructor
         ~TrajectoryGenerator();
@@ -32,7 +33,7 @@ class TrajectoryGenerator
         // variables
 
     private:
-        
+        Map& map;
 
 };
 
