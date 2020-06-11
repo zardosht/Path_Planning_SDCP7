@@ -27,7 +27,7 @@ class TrajectoryGenerator
         ~TrajectoryGenerator();
 
         // functions
-        Trajectory generate_trajectory(State state, Vehicle& vehicle);
+        Trajectory generate_trajectory(Behavior behavior, Vehicle& vehicle);
 
         // variables
 

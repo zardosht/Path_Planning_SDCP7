@@ -60,10 +60,11 @@ int main() {
   // double ref_vel = 0.0;  //mph
 
   TrajectoryGenerator tg;
+  BehaviorPlanner bp;
 
 
   h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
-               &map_waypoints_dx,&map_waypoints_dy, &tg]
+               &map_waypoints_dx,&map_waypoints_dy, &bp, &tg]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -111,8 +112,9 @@ int main() {
           
           Vehicle ego_car(EGOCAR_ID, car_x, car_y, car_s, car_d, car_yaw);
           
+          Behavior behavior = bp.next_behavior();
 
-          Trajectory trajectory = tg.generate_trajectory(State::CS, ego_car);
+          Trajectory trajectory = tg.generate_trajectory(behavior, ego_car);
 
           // vector<double> next_x_vals;
           // vector<double> next_y_vals;

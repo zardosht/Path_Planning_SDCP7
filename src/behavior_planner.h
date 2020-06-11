@@ -2,7 +2,7 @@
 #define BEHAVIOR_PLANNER_H
 
 
-enum State {
+enum Behavior {
     // go straight at constant speed
     CS,
     // keep the lane
@@ -21,21 +21,21 @@ enum State {
 class BehaviorPlanner {
    public: 
         //constructor
-        BehaviorPlanner(int i);
+        BehaviorPlanner();
 
         //desctructor
         ~BehaviorPlanner();
 
         //functions
-        State next_state();
+        Behavior next_behavior();
 
 
         // variables
-        State currentState; 
+        Behavior behavior; 
     
     private: 
-        float calcuateCost(State state);
-        float sucessor_states(State state);
+        float calcuateCost(Behavior behavior);
+        float sucessor_behaviors(Behavior behavior);
        
 }; 
 

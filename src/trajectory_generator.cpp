@@ -9,7 +9,7 @@ TrajectoryGenerator::TrajectoryGenerator()
 
 TrajectoryGenerator::~TrajectoryGenerator() {}
 
-Trajectory TrajectoryGenerator::generate_trajectory(State state, Vehicle& egocar)
+Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& egocar)
 {
     Trajectory trajectory;
 
