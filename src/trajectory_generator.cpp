@@ -70,29 +70,13 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
 
     // prepare spline
     tk::spline spl;
-    cout << "spline_knots.row(0).size()=" << spline_knots.row(0).size() << endl;
-    cout << "spline_knots = " << spline_knots << endl;
-
     vector<double> knot_xs(spline_knots.cols());
     vector<double> knot_ys(spline_knots.cols());
     for (int i = 0; i < spline_knots.cols(); ++i) 
     {
-        cout << "spline_knots(0, i) = " << spline_knots(0, i) << endl;
-        cout << "spline_knots(1, i) = " << spline_knots(1, i) << endl;
-
         knot_xs[i] = spline_knots(0, i);
         knot_ys[i] = spline_knots(1, i);
     }
-
-    cout << "knot_xs = " << knot_xs[0] << endl;
-    cout << "knot_ys = " << knot_ys[0] << endl;
-    cout << "knot_xs = " << knot_xs[1] << endl;
-    cout << "knot_ys = " << knot_ys[1] << endl;
-    cout << "knot_xs = " << knot_xs[2] << endl;
-    cout << "knot_ys = " << knot_ys[2] << endl;
-    cout << "knot_xs = " << knot_xs[3] << endl;
-    cout << "knot_ys = " << knot_ys[3] << endl;
-
     spl.set_points(knot_xs, knot_ys);
 
     // add points from previus path to the beginning of the current path
@@ -167,15 +151,8 @@ void TrajectoryGenerator::initial_spline_points(Array2Xd& spline_knots, Vehicle&
     int prev_path_size = prev_path.size();
     if(prev_path_size < 2) 
     {
-        cout << "egocar.yaw = " << egocar.yaw << endl;
-        cout << "egocar.x = " << egocar.x << endl;
-        cout << "cos(egocar.yaw) = " << cos(egocar.yaw) << endl;
-        cout << "egocar.x - cos(egocar.yaw) = " << egocar.x - cos(egocar.yaw) << endl;
-
         double prelast_x = egocar.x - cos(egocar.yaw);
         double prelast_y = egocar.y - sin(egocar.yaw);
-
-        cout << "prelast_x = " << prelast_x << endl;
 
         spline_knots(0, 0) = prelast_x;
         spline_knots(0, 1) = egocar.x;
@@ -226,25 +203,11 @@ void TrajectoryGenerator::transform_to_local(Array2Xd& spline_knots,  const doub
     // transformed accordingly)
     for(int i = 0; i < spline_knots.cols(); ++i)
     {
-        cout << "ref_yaw = " << ref_yaw << endl;
-        cout << "ref_x = " << ref_x << endl;
-        cout << "spline_knots(0, i) = " << spline_knots(0, i) << endl;
-        cout << "ref_y = " << ref_y << endl;
-        cout << "spline_knots(1, i) = " << spline_knots(1, i) << endl;
-
-
         double shift_x = spline_knots(0, i) - ref_x;
-        cout << "shift_x = " << shift_x << endl;
-
         double shift_y = spline_knots(1, i) - ref_y;
-        cout << "shift_y = " << shift_y << endl;
 
-        cout << "(shift_x * cos(0 - ref_yaw) - shift_y * sin(0 - ref_yaw)) = " << (shift_x * cos(0 - ref_yaw) - shift_y * sin(0 - ref_yaw)) << endl;
         spline_knots(0, i) = (shift_x * cos(0 - ref_yaw) - shift_y * sin(0 - ref_yaw));
-        
-        cout << "(shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw)) = " << (shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw)) << endl;
         spline_knots(1, i) = (shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw));
-
     }
     
 }
