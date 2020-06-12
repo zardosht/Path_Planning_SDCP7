@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "functional": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "tmp": "cpp"
     }
 }

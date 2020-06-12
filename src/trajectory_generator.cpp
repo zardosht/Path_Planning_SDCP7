@@ -1,5 +1,4 @@
 #include "trajectory_generator.h"
-#include "helpers.h"
 #include "spline.h"
 #include <iostream>
 
@@ -189,21 +188,12 @@ void prepare_trajectory_spline(tk::spline& spl,
     // end knot points for the spline
     // pick points in the far distance to
     // have a smooth spline
-    vector<double> next_wp0 = getXY(ego_s + 30, 
-                                    (2.0 + 4.0 * lane), 
-                                    map.waypoints_s, 
-                                    map.waypoints_x, 
-                                    map.waypoints_y);
-    vector<double> next_wp1 = getXY(ego_s + 60, 
-                                    (2.0 + 4.0 * lane), 
-                                    map.waypoints_s, 
-                                    map.waypoints_x, 
-                                    map.waypoints_y);
-    vector<double> next_wp2 = getXY(ego_s + 90, 
-                                    (2.0 + 4.0 * lane), 
-                                    map.waypoints_s, 
-                                    map.waypoints_x, 
-                                    map.waypoints_y);
+    vector<double> next_wp0 = map.get_xy(ego_s + 30, 
+                                    (2.0 + 4.0 * lane));
+    vector<double> next_wp1 = map.get_xy(ego_s + 60, 
+                                    (2.0 + 4.0 * lane));
+    vector<double> next_wp2 = map.get_xy(ego_s + 90, 
+                                    (2.0 + 4.0 * lane));
     ptsx.push_back(next_wp0[0]);
     ptsx.push_back(next_wp1[0]);
     ptsx.push_back(next_wp2[0]); 
