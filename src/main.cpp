@@ -98,6 +98,7 @@ int main() {
            */
           
           Vehicle ego_car(EGOCAR_ID, car_x, car_y, car_s, car_d, car_yaw);
+          ego_car.speed = car_speed;
           
           Behavior behavior = bp.next_behavior();
 

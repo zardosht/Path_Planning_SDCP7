@@ -44,6 +44,12 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
     // find out the acceleration from behavior value (ACCEL, ZERO, DECEL)
     double d = get_d(behavior, egocar);
     Accel accel = get_accel(behavior);
+
+    int prev_path_size = previous_path.size();
+    std::cout << "previous path size: " << prev_path_size << std::endl;
+    if (prev_path_size >= NUM_TRAJECTORY_POINTS) 
+        return previous_path;
+
     return generate_trajectory(egocar, d, accel, previous_path);
 
 }
@@ -105,39 +111,78 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
     // The number of points N is then given by deviding the distance 
     // by the (speed * time_step). 
 
-    double ref_vel = 49.5;  //mph
+    double v0 = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
     double target_x = 30.0; //horizon
     double target_y = spl(target_x);
     double target_dist = sqrt(target_x * target_x + target_y * target_y);
-    double ref_vel_m_per_sec = ref_vel / 2.24;
-    double N = target_dist / (0.02 * ref_vel_m_per_sec);
 
-    double x_add_on = 0;
-    // fill the rest of current path (till we have 50 points)
-    // with the points interpolated by the spline
-    for(int i = 1; i <= 50 - prev_path_size; i++) 
-    {
-        double x_point = x_add_on + target_x / N;
-        double y_point = spl(x_point);
-
-        x_add_on = x_point;
-        double x_ref = x_point;
-        double y_ref = y_point;
-
-        x_point = (x_ref * cos(ref_yaw) - y_ref * sin(ref_yaw));
-        y_point = (x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw));
-
-        x_point += ref_x;
-        y_point += ref_y;
-
-        trajectory.xs.push_back(x_point);
-        trajectory.ys.push_back(y_point);
-
+    double a = 0.0;
+    if (accel == Accel::ACCEL) {
+        // 0.224 roughly corresponds to 5 m/s^2 acceleration
+        // ref_vel -= 0.224;
+        a = 5.0;
+    } else if (accel == Accel::ZERO ) {
+        a = 0.0;
+    } else if (accel == Accel::DECEL) {
+        a = -5.0;
     }
 
+    double v0_m_per_s = v0 / 2.24; // current speed in m/s
+    double x = 0.0;
+    double t = 0.0;
+    int traj_points = 0;
+    while (x < target_x)
+    {   
+        t += TIMESTEP;
+        x = 0.5 * a * t*t + v0_m_per_s * t;
+        double y = spl(x);
+
+        // convert to global coordinates
+        double x_tmp = x;
+        double y_tmp = y;
+
+        double x_global = (x_tmp * cos(ref_yaw) - y_tmp * sin(ref_yaw));
+        double y_global = (x_tmp * sin(ref_yaw) + y_tmp * cos(ref_yaw));
+
+        x_global += ref_x;
+        y_global += ref_y;
+
+        if(traj_points++ < NUM_TRAJECTORY_POINTS)
+        {
+            trajectory.xs.push_back(x_global);
+            trajectory.ys.push_back(y_global);
+        }
+        else break;
+    }
+
+
+    // double ref_vel_m_per_sec = ref_vel / 2.24;
+    // double N = target_dist / (0.02 * ref_vel_m_per_sec);
+
+    // double x_add_on = 0;
+    // // fill the rest of current path (till we have 50 points)
+    // // with the points interpolated by the spline
+    // for(int i = 1; i <= NUM_TRAJECTORY_POINTS - prev_path_size; i++) 
+    // {
+    //     double x_point = x_add_on + target_x / N;
+    //     double y_point = spl(x_point);
+
+    //     x_add_on = x_point;
+    //     double x_ref = x_point;
+    //     double y_ref = y_point;
+
+    //     x_point = (x_ref * cos(ref_yaw) - y_ref * sin(ref_yaw));
+    //     y_point = (x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw));
+
+    //     x_point += ref_x;
+    //     y_point += ref_y;
+
+    //     trajectory.xs.push_back(x_point);
+    //     trajectory.ys.push_back(y_point);
+
+    // }
+
     return trajectory;
-
-
 }
 
 // Returns the two points to start the new trajectory from. 

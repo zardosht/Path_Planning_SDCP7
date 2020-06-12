@@ -15,6 +15,7 @@ using Eigen::Array2Xd;
 
 
 const int NUM_TRAJECTORY_POINTS = 50;
+const double TIMESTEP = 0.02;
 
 
 // Defines general accleration values
