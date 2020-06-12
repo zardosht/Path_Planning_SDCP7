@@ -121,10 +121,12 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
         // 0.224 roughly corresponds to 5 m/s^2 acceleration
         // ref_vel -= 0.224;
         a = 5.0;
+        //a = 1.0;
     } else if (accel == Accel::ZERO ) {
         a = 0.0;
     } else if (accel == Accel::DECEL) {
         a = -5.0;
+        //a = -1.0;
     }
 
     double v0_m_per_s = v0 / 2.24; // current speed in m/s
@@ -134,6 +136,16 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
     while (x < target_x)
     {   
         t += TIMESTEP;
+        // double v1 = a * t;
+        // if (v1 * 2.24 >  MAX_SPEED)  //v1 in mph
+        // {
+        //     x = 0.5 * a * t*t + v0_m_per_s * t;
+        // }
+        // else
+        // {
+        //     x = v1 * t;    
+        // }
+        
         x = 0.5 * a * t*t + v0_m_per_s * t;
         double y = spl(x);
 
@@ -274,7 +286,8 @@ double TrajectoryGenerator::get_d(Behavior behavior, Vehicle& egocar)
 Accel TrajectoryGenerator::get_accel(Behavior behavior)
 {
     // if (behavior == KeepLane) {}
-    return Accel::ZERO;
+    //return Accel::ZERO;
+    return Accel::ACCEL;
 }
 
 

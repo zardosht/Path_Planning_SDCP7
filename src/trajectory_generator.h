@@ -16,6 +16,7 @@ using Eigen::Array2Xd;
 
 const int NUM_TRAJECTORY_POINTS = 50;
 const double TIMESTEP = 0.02;
+const double MAX_SPEED = 49.5; //mph 
 
 
 // Defines general accleration values
