@@ -13,10 +13,16 @@ using std::vector;
 
 using Eigen::Array2Xd;
 
-
+// how many point to calculate for a trajectory
 const int NUM_TRAJECTORY_POINTS = 50;
+
+// threshold to start planning a new trajectory; otherwise consume points from previous trajectory.
+const int PLAN_NEW_TRAJECTORY_THRESHOLD = 10;
+
+// the simulator reachs (consumes) each point of trajectory in TIMESTEP
 const double TIMESTEP = 0.02;
-const double MAX_SPEED = 49.5; //mph 
+
+const double MAX_SPEED = 48.5;  // mph
 
 
 // Defines general accleration values
@@ -37,7 +43,12 @@ struct Trajectory
 {
     vector<double> xs;
     vector<double> ys;
+    
+    double end_s = -1.0;
+    double end_d = -1.0;
+    
     int size() {return xs.size();}
+
 };
 
 class TrajectoryGenerator 
@@ -64,7 +75,7 @@ class TrajectoryGenerator
 
         void initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
 
-        void end_spline_points(Array2Xd& spline_knots, Vehicle& egocar, double target_d);
+        void end_spline_points(Array2Xd& spline_knots, double start_from_s, double target_d);
 
         void transform_to_local(Array2Xd& spline_knots, const double ref_x, const double ref_y, const double ref_yaw);
 

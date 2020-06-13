@@ -46,10 +46,10 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
     Accel accel = get_accel(behavior);
 
     int prev_path_size = previous_path.size();
-    std::cout << "previous path size: " << prev_path_size << std::endl;
-    if (prev_path_size >= NUM_TRAJECTORY_POINTS) 
+    if (prev_path_size >= PLAN_NEW_TRAJECTORY_THRESHOLD) 
         return previous_path;
 
+    std::cout << "\nprevious path size: " << prev_path_size << std::endl;
     return generate_trajectory(egocar, d, accel, previous_path);
 
 }
@@ -58,23 +58,28 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
 Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, Accel accel, Trajectory& previous_path) 
 {
 
-    std::cout << "previous path size: " << previous_path.size() << std::endl;
+    int prev_path_size = previous_path.size();
 
     // get initial spline knots
     // get initial yaw (for transforming the points
     // into local coordinates and back to global coordinates)
     // get end spline knots
-    Array2Xd spline_knots(2, 4);
+    Array2Xd spline_knots(2, 5);
     double ref_yaw = 0.0;  //inout
     initial_spline_points(spline_knots, egocar, previous_path, ref_yaw);
+
     double ref_x = spline_knots(0, 1);
     double ref_y = spline_knots(1, 1);
-    end_spline_points(spline_knots, egocar, d);
+
+    cout << "egocar.s: " << egocar.s << endl;
+    double start_from_s = (prev_path_size < 2)? egocar.s : previous_path.end_s;
+    end_spline_points(spline_knots, start_from_s, d);
 
     // transform spline knots into local coordinates
     transform_to_local(spline_knots, ref_x, ref_y, ref_yaw);
 
     // prepare spline
+    cout << "spline_knots: \n" << spline_knots << endl;
     tk::spline spl;
     vector<double> knot_xs(spline_knots.cols());
     vector<double> knot_ys(spline_knots.cols());
@@ -87,7 +92,6 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
 
     // add points from previus path to the beginning of the current path
     Trajectory trajectory;
-    int prev_path_size = previous_path.size();
     for(int i = 0; i < prev_path_size; ++i)
     {
         trajectory.xs.push_back(previous_path.xs[i]);
@@ -111,42 +115,60 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
     // The number of points N is then given by deviding the distance 
     // by the (speed * time_step). 
 
-    double v0 = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
-    double target_x = 30.0; //horizon
-    double target_y = spl(target_x);
-    double target_dist = sqrt(target_x * target_x + target_y * target_y);
+    // double target_x = 30.0; //horizon
+    // double target_y = spl(target_x);
+    // double target_dist = sqrt(target_x * target_x + target_y * target_y);
+
+    
+    // double a = 0.0;
+    // if (accel == Accel::ACCEL) {
+    //     // 0.224 roughly corresponds to 5 m/s^2 acceleration
+    //     // ref_vel -= 0.224;
+    //     // a = 5.0;
+    //     a = 1.0;
+    // } else if (accel == Accel::ZERO ) {
+    //     a = 0.0;
+    // } else if (accel == Accel::DECEL) {
+    //     // a = -5.0;
+    //     a = -1.0;
+    // }
+
+    // double v_m_per_s = v0 / 2.24; // current speed in m/s
+    // if (v_m_per_s * 2.24 < MAX_SPEED) { // convert v to mph for comparing
+    //     v_m_per_s +=  a * t;
+    // }
 
     double a = 0.0;
+    double v0 = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
+    v0 = v0 / 2.24;   // current speed in m/s
     if (accel == Accel::ACCEL) {
-        // 0.224 roughly corresponds to 5 m/s^2 acceleration
-        // ref_vel -= 0.224;
-        a = 5.0;
-        //a = 1.0;
-    } else if (accel == Accel::ZERO ) {
-        a = 0.0;
+        // if (v0 * 2.24 < MAX_SPEED) {  // convert v to mph for comparing
+        //     v0 += 1;
+        // }
+        if(v0 * 2.24 < MAX_SPEED) {
+            a = 1.0;
+        }
     } else if (accel == Accel::DECEL) {
-        a = -5.0;
-        //a = -1.0;
+        // if (v0 > 5) {
+        //     v0 -= 5;
+        // }
+        if (v0 > 0) {
+            a = -1.0;
+        }
     }
 
-    double v0_m_per_s = v0 / 2.24; // current speed in m/s
     double x = 0.0;
     double t = 0.0;
-    int traj_points = 0;
-    while (x < target_x)
-    {   
+    // int traj_points = trajectory.size();
+    for(int i = 1; i <= 50 - prev_path_size; i++) 
+          { 
         t += TIMESTEP;
-        // double v1 = a * t;
-        // if (v1 * 2.24 >  MAX_SPEED)  //v1 in mph
-        // {
-        //     x = 0.5 * a * t*t + v0_m_per_s * t;
-        // }
-        // else
-        // {
-        //     x = v1 * t;    
-        // }
+        //x = v_m_per_s * t;
+        // x = v0 * cos(ref_yaw) * t;
         
-        x = 0.5 * a * t*t + v0_m_per_s * t;
+        //x = v0 * t;
+        
+        x = 0.5 * a * t*t + v0 * t;
         double y = spl(x);
 
         // convert to global coordinates
@@ -158,15 +180,14 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
 
         x_global += ref_x;
         y_global += ref_y;
-
-        if(traj_points++ < NUM_TRAJECTORY_POINTS)
-        {
-            trajectory.xs.push_back(x_global);
-            trajectory.ys.push_back(y_global);
-        }
-        else break;
+       
+        trajectory.xs.push_back(x_global);
+        trajectory.ys.push_back(y_global);
+    
     }
 
+    cout << "Num Trajectory points: " << trajectory.size() << endl;
+    return trajectory;
 
     // double ref_vel_m_per_sec = ref_vel / 2.24;
     // double N = target_dist / (0.02 * ref_vel_m_per_sec);
@@ -194,7 +215,8 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
 
     // }
 
-    return trajectory;
+    // cout << "Num Trajectory points: " << trajectory.size();
+    // return trajectory;
 }
 
 // Returns the two points to start the new trajectory from. 
@@ -216,7 +238,7 @@ void TrajectoryGenerator::initial_spline_points(Array2Xd& spline_knots, Vehicle&
         spline_knots(1, 0) = prelast_y;
         spline_knots(1, 1) = egocar.y;
 
-        ref_yaw = egocar.yaw;
+        ref_yaw = deg2rad(egocar.yaw);
     } 
     else 
     {
@@ -231,23 +253,32 @@ void TrajectoryGenerator::initial_spline_points(Array2Xd& spline_knots, Vehicle&
         spline_knots(1, 1) = last_y;
 
         ref_yaw = atan2(last_y - prelast_y, last_x - prelast_x);
+        cout << "ref_yaw: " << ref_yaw << endl;
     }
 
 }
 
-void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, Vehicle& egocar, double target_d)
+void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, double start_from_s, double target_d)
 {
+    cout << "start_from_s: " << start_from_s << endl;
+    
 
     // end knot points for the spline
     // pick points in the far distance to
     // have a smooth spline
-    vector<double> end_pt1 = map.get_xy(egocar.s + 30, target_d);
-    vector<double> end_pt2 = map.get_xy(egocar.s + 60, target_d);
+    vector<double> end_pt1 = map.get_xy(start_from_s + 30, target_d);
+    vector<double> end_pt2 = map.get_xy(start_from_s + 60, target_d);
+    vector<double> end_pt3 = map.get_xy(start_from_s + 90, target_d);
 
+    //spline_knots already includes the two begining points
     spline_knots(0, 2) = end_pt1[0];
     spline_knots(0, 3) = end_pt2[0];
+    spline_knots(0, 4) = end_pt3[0];
+
     spline_knots(1, 2) = end_pt1[1];
     spline_knots(1, 3) = end_pt2[1];
+    spline_knots(1, 4) = end_pt2[1];
+
 
 }
 

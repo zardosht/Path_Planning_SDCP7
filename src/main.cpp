@@ -105,6 +105,8 @@ int main() {
           Trajectory previous_path;
           previous_path.xs.assign(previous_path_x.begin(), previous_path_x.end());
           previous_path.ys.assign(previous_path_y.begin(), previous_path_y.end());
+          previous_path.end_s = end_path_s;
+          previous_path.end_d = end_path_d;
           Trajectory trajectory = tg.generate_trajectory(behavior, ego_car, previous_path);
 
 
