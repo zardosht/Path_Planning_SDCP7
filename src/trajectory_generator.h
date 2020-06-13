@@ -17,7 +17,7 @@ using Eigen::Array2Xd;
 const int NUM_TRAJECTORY_POINTS = 50;
 
 // threshold to start planning a new trajectory; otherwise consume points from previous trajectory.
-const int PLAN_NEW_TRAJECTORY_THRESHOLD = 10;
+const int PLAN_NEW_TRAJECTORY_THRESHOLD = 48;
 
 // the simulator reachs (consumes) each point of trajectory in TIMESTEP
 const double TIMESTEP = 0.02;
@@ -80,6 +80,8 @@ class TrajectoryGenerator
         void transform_to_local(Array2Xd& spline_knots, const double ref_x, const double ref_y, const double ref_yaw);
 
         Map& map;
+
+        double vel = 0.224;
 
 };
 

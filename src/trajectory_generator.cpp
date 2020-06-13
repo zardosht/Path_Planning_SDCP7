@@ -115,61 +115,30 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
     // The number of points N is then given by deviding the distance 
     // by the (speed * time_step). 
 
-    // double target_x = 30.0; //horizon
-    // double target_y = spl(target_x);
-    // double target_dist = sqrt(target_x * target_x + target_y * target_y);
+    double target_x = 30.0; //horizon
+    double target_y = spl(target_x);
+    double target_dist = sqrt(target_x * target_x + target_y * target_y);
+    // double vel = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
+    double vel_mps = vel / 2.24;   // current speed in m/s
+    double num_points = target_dist / (TIMESTEP * vel_mps);
 
-    
-    // double a = 0.0;
-    // if (accel == Accel::ACCEL) {
-    //     // 0.224 roughly corresponds to 5 m/s^2 acceleration
-    //     // ref_vel -= 0.224;
-    //     // a = 5.0;
-    //     a = 1.0;
-    // } else if (accel == Accel::ZERO ) {
-    //     a = 0.0;
-    // } else if (accel == Accel::DECEL) {
-    //     // a = -5.0;
-    //     a = -1.0;
-    // }
-
-    // double v_m_per_s = v0 / 2.24; // current speed in m/s
-    // if (v_m_per_s * 2.24 < MAX_SPEED) { // convert v to mph for comparing
-    //     v_m_per_s +=  a * t;
-    // }
-
-    double a = 0.0;
-    double v0 = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
-    v0 = v0 / 2.24;   // current speed in m/s
     if (accel == Accel::ACCEL) {
-        // if (v0 * 2.24 < MAX_SPEED) {  // convert v to mph for comparing
-        //     v0 += 1;
-        // }
-        if(v0 * 2.24 < MAX_SPEED) {
-            a = 1.0;
+        if (vel < MAX_SPEED) {  // convert v to mph for comparing
+            cout << "Increase speed by 0.224" << endl;
+            vel += 0.224;
         }
     } else if (accel == Accel::DECEL) {
-        // if (v0 > 5) {
-        //     v0 -= 5;
-        // }
-        if (v0 > 0) {
-            a = -1.0;
+        if (vel > 1) {
+            vel -= 0.224;
         }
     }
 
-    double x = 0.0;
-    double t = 0.0;
-    // int traj_points = trajectory.size();
-    for(int i = 1; i <= 50 - prev_path_size; i++) 
-          { 
-        t += TIMESTEP;
-        //x = v_m_per_s * t;
-        // x = v0 * cos(ref_yaw) * t;
-        
-        //x = v0 * t;
-        
-        x = 0.5 * a * t*t + v0 * t;
+    double x_add_on = 0.0;
+    for(int i = 1; i <= NUM_TRAJECTORY_POINTS - prev_path_size; i++) 
+    { 
+        double x = x_add_on + target_x / num_points;
         double y = spl(x);
+        x_add_on = x;
 
         // convert to global coordinates
         double x_tmp = x;
@@ -188,35 +157,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
 
     cout << "Num Trajectory points: " << trajectory.size() << endl;
     return trajectory;
-
-    // double ref_vel_m_per_sec = ref_vel / 2.24;
-    // double N = target_dist / (0.02 * ref_vel_m_per_sec);
-
-    // double x_add_on = 0;
-    // // fill the rest of current path (till we have 50 points)
-    // // with the points interpolated by the spline
-    // for(int i = 1; i <= NUM_TRAJECTORY_POINTS - prev_path_size; i++) 
-    // {
-    //     double x_point = x_add_on + target_x / N;
-    //     double y_point = spl(x_point);
-
-    //     x_add_on = x_point;
-    //     double x_ref = x_point;
-    //     double y_ref = y_point;
-
-    //     x_point = (x_ref * cos(ref_yaw) - y_ref * sin(ref_yaw));
-    //     y_point = (x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw));
-
-    //     x_point += ref_x;
-    //     y_point += ref_y;
-
-    //     trajectory.xs.push_back(x_point);
-    //     trajectory.ys.push_back(y_point);
-
-    // }
-
-    // cout << "Num Trajectory points: " << trajectory.size();
-    // return trajectory;
+    
 }
 
 // Returns the two points to start the new trajectory from. 
