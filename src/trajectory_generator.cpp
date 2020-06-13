@@ -141,17 +141,10 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, A
         x_add_on = x;
 
         // convert to global coordinates
-        double x_tmp = x;
-        double y_tmp = y;
-
-        double x_global = (x_tmp * cos(ref_yaw) - y_tmp * sin(ref_yaw));
-        double y_global = (x_tmp * sin(ref_yaw) + y_tmp * cos(ref_yaw));
-
-        x_global += ref_x;
-        y_global += ref_y;
+        vector<double> xy_global = transform_to_global(x, y, ref_x, ref_y, ref_yaw);
        
-        trajectory.xs.push_back(x_global);
-        trajectory.ys.push_back(y_global);
+        trajectory.xs.push_back(xy_global[0]);
+        trajectory.ys.push_back(xy_global[1]);
     
     }
 
@@ -239,6 +232,18 @@ void TrajectoryGenerator::transform_to_local(Array2Xd& spline_knots,  const doub
         spline_knots(1, i) = (shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw));
     }
     
+}
+
+
+vector<double> TrajectoryGenerator::transform_to_global(const double x_local, const double y_local, const double ref_x, const double ref_y, const double ref_yaw)
+{        
+        double x_global = (x_local * cos(ref_yaw) - y_local * sin(ref_yaw));
+        double y_global = (x_local * sin(ref_yaw) + y_local * cos(ref_yaw));
+
+        x_global += ref_x;
+        y_global += ref_y;
+
+        return {x_global, y_global};
 }
 
 

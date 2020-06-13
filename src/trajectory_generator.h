@@ -79,6 +79,8 @@ class TrajectoryGenerator
 
         void transform_to_local(Array2Xd& spline_knots, const double ref_x, const double ref_y, const double ref_yaw);
 
+        vector<double> transform_to_global(const double x_local, const double y_local, const double ref_x, const double ref_y, const double ref_yaw);
+
         Map& map;
 
         double vel = 0.224;
