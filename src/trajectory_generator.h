@@ -61,17 +61,17 @@ class TrajectoryGenerator
         ~TrajectoryGenerator();
 
         // functions
-        Trajectory generate_trajectory(Behavior behavior, Vehicle& vehicle, Trajectory& previous_path);
+        Trajectory generate_trajectory(int behavior, Vehicle& vehicle, Trajectory& previous_path);
 
         // variables
 
     private:
 
-        double get_d(Behavior behavior, Vehicle& egocar); 
+        double get_d(int behavior, Vehicle& egocar); 
 
-        Accel get_accel(Behavior behavior);
+        int get_accel(int behavior);
 
-        Trajectory generate_trajectory(Vehicle& egocar, double d, Accel accel, Trajectory& previous_path);
+        Trajectory generate_trajectory(Vehicle& egocar, double d, int accel, Trajectory& previous_path);
 
         void initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
 

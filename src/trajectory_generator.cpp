@@ -15,7 +15,7 @@ TrajectoryGenerator::TrajectoryGenerator(Map& map) : map(map)
 TrajectoryGenerator::~TrajectoryGenerator() {}
 
 
-Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& egocar, Trajectory& previous_path)
+Trajectory TrajectoryGenerator::generate_trajectory(int behavior, Vehicle& egocar, Trajectory& previous_path)
 {
     
 
@@ -43,7 +43,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
     // find out the lane from behavior value
     // find out the acceleration from behavior value (ACCEL, ZERO, DECEL)
     double d = get_d(behavior, egocar);
-    Accel accel = get_accel(behavior);
+    int accel = get_accel(behavior);
 
     int prev_path_size = previous_path.size();
     if (prev_path_size >= PLAN_NEW_TRAJECTORY_THRESHOLD) 
@@ -55,7 +55,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
 }
 
 
-Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, Accel accel, Trajectory& previous_path) 
+Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, int accel, Trajectory& previous_path) 
 {
 
     int prev_path_size = previous_path.size();
@@ -247,64 +247,36 @@ vector<double> TrajectoryGenerator::transform_to_global(const double x_local, co
 }
 
 
-double TrajectoryGenerator::get_d(Behavior behavior, Vehicle& egocar) 
+double TrajectoryGenerator::get_d(int behavior, Vehicle& egocar) 
 {
     // find current lane
-    double d = egocar.d;
-    int current_lane = 0;
-    if (d >= 0 && d < 4) 
-        current_lane = 0;
-    else if (d >= 4 && d < 8)
-        current_lane = 1;
-    else if (d >= 8 && d < 12)
-        current_lane = 2;
-    
-    int target_lane = current_lane;
-    switch (behavior)
-    {
-    case ChangeLaneLeft:
-        target_lane -= 1;
-        break;
-    
-    case ChangeLaneRight:
-        target_lane += 1;
-        break;
+    int lane = egocar.get_lane();
+    if (behavior & Behavior::ChangeLaneLeft) {
+        if (lane > 0){
+            lane += -1;
+        }
+    } else if (behavior & Behavior::ChangeLaneRight) {
+        if (lane < 3) {
+            lane += 1;
+        }
     }
 
-    return (2.0 + 4.0 * target_lane);
+    return (2.0 + 4.0 * lane);
 }   
 
 
-Accel TrajectoryGenerator::get_accel(Behavior behavior)
+int TrajectoryGenerator::get_accel(int behavior)
 {
     // SlowDown = keep lane (same lane) and decrease speed
     // SpeedUp = keep lane (same lane) and increase speed
     // KeepLane = same lane, do not change speed
-    // ChangeLaneRight = change lane right (increase d) and increase speed
-    // ChangeLaneLeft = change lane left (decrease d) and increase speed
-    switch (behavior)
-    {
-    case KeepLane:
-        return Accel::ZERO;
-        break;
-    
-    case SlowDown:
-        return Accel::DECEL;
-        break;
-
-    case SpeedUp: 
+    // ChangeLaneRight = change lane right (increase d) do not change speed
+    // ChangeLaneLeft = change lane left (decrease d) do not change speed
+    if (behavior & Behavior::SpeedUp) {
         return Accel::ACCEL;
-        break; 
-
-    case ChangeLaneRight:
+    } else if (behavior & Behavior::SlowDown){
         return Accel::DECEL;
-        break;
-    
-    case ChangeLaneLeft:
-        return Accel::ACCEL;
-    
-    default:
+    } else {
         return Accel::ZERO;
     }
-    
 }

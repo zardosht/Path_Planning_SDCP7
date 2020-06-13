@@ -98,7 +98,11 @@ int main() {
            */
 
           int prev_size = previous_path_x.size();
-          int lane = 1;
+          
+          Vehicle ego_car(EGOCAR_ID, car_x, car_y, car_s, car_d, car_yaw);
+          ego_car.speed = car_speed;
+          int lane = ego_car.get_lane();
+          int behavior = Behavior::KeepLane;
 
           // where will our ego car be at the end of 
           // previous_path points
@@ -142,13 +146,13 @@ int main() {
                 // change lane
                 if (lane > 0) 
                 {
-                  lane = 0;
+                  behavior = Behavior::ChangeLaneLeft;
                 }
               } 
             }
           }
 
-          Behavior behavior;
+          
           // gradually decreas or increase the speed
           // to avoid jerk (both at the beginning and
           // when we are behind a car in our lane)
@@ -156,19 +160,16 @@ int main() {
           {
             // 0.224 roughly corresponds to 5 m/s^2 acceleration
             // ref_vel -= 0.224;
-            behavior = Behavior::SlowDown;
+            behavior |= Behavior::SlowDown;
           }
           else if (car_speed < 49.5)
           {
             // ref_vel += 0.224;
-            behavior = Behavior::SpeedUp;
+            behavior |= Behavior::SpeedUp;
           }
 
-
-          
-          Vehicle ego_car(EGOCAR_ID, car_x, car_y, car_s, car_d, car_yaw);
-          ego_car.speed = car_speed;
-          
+          // Vehicle ego_car(EGOCAR_ID, car_x, car_y, car_s, car_d, car_yaw);
+          // ego_car.speed = car_speed;
           // Behavior behavior = bp.next_behavior();
 
           Trajectory previous_path;

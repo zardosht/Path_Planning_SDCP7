@@ -18,6 +18,8 @@ class Vehicle
         //functions
         double get_speed();
 
+        int get_lane();
+
         //variables
         int id;
         double x, y, s, d, yaw, vx, vy, speed;

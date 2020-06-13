@@ -8,7 +8,7 @@ BehaviorPlanner::BehaviorPlanner()
 
 BehaviorPlanner::~BehaviorPlanner() {}
 
-Behavior BehaviorPlanner::next_behavior() 
+int BehaviorPlanner::next_behavior() 
 {
     return Behavior::KeepLane;
 }

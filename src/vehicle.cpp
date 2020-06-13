@@ -26,3 +26,13 @@ Vehicle::Vehicle(int id, double x, double y, double vx, double vy, double s, dou
 }
 
 Vehicle::~Vehicle() { }
+
+int Vehicle::get_lane()
+{ 
+    if (d >= 0 && d < 4) 
+        return 0;
+    else if (d >= 4 && d < 8)
+        return 1;
+    else if (d >= 8 && d < 12)
+        return 2;
+}

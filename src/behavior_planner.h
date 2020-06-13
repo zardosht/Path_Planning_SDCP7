@@ -3,16 +3,16 @@
 
 
 enum Behavior {
-    // keep lane (same lane) and decrease speed
-    SlowDown,
-    // keep lane (same lane) and increase speed
-    SpeedUp,
     // same lane, do not change speed
-    KeepLane,
+    KeepLane = 1<<0,
+    // keep lane (same lane) and decrease speed
+    SlowDown = 1<<1,
+    // keep lane (same lane) and increase speed
+    SpeedUp = 1<<2,
     // change lane right (increase d) and decrease speed
-    ChangeLaneRight, 
+    ChangeLaneRight = 1<<3, 
     // change lane left (decrease d) and increase speed
-    ChangeLaneLeft
+    ChangeLaneLeft = 1<<4
 };
 
 
@@ -25,15 +25,15 @@ class BehaviorPlanner {
         ~BehaviorPlanner();
 
         //functions
-        Behavior next_behavior();
+        int next_behavior();
 
 
         // variables
         Behavior behavior; 
     
     private: 
-        float calcuateCost(Behavior behavior);
-        float sucessor_behaviors(Behavior behavior);
+        float calcuateCost(int behavior);
+        float sucessor_behaviors(int behavior);
        
 }; 
 
