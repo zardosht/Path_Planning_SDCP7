@@ -10,7 +10,7 @@ BehaviorPlanner::~BehaviorPlanner() {}
 
 Behavior BehaviorPlanner::next_behavior() 
 {
-    return Behavior::CS;
+    return Behavior::KeepLane;
 }
 
 

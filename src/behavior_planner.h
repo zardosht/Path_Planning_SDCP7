@@ -3,18 +3,16 @@
 
 
 enum Behavior {
-    // go straight at constant speed
-    CS,
-    // keep the lane
-    KL,
-    // prepare lane change left
-    PLCL,
-    // prepare lane change right
-    PLCR, 
-    // lane change left
-    LCL, 
-    // Change lane right
-    LCR 
+    // keep lane (same lane) and decrease speed
+    SlowDown,
+    // keep lane (same lane) and increase speed
+    SpeedUp,
+    // same lane, do not change speed
+    KeepLane,
+    // change lane right (increase d) and decrease speed
+    ChangeLaneRight, 
+    // change lane left (decrease d) and increase speed
+    ChangeLaneLeft
 };
 
 
