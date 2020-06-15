@@ -88,7 +88,7 @@ int BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, vecto
         if (ego_lane > 0 && !car_in_left) {
             behavior = Behavior::ChangeLaneLeft;
         } else if (ego_lane < 3 && !car_in_right) {
-            behavior = Behavior::ChangeLaneRight;
+            behavior = Behavior::ChangeLaneRight | Behavior::SlowDown;
         } 
     } 
 
