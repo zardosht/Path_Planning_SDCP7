@@ -67,6 +67,11 @@ int BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, vecto
         }
     }
 
+
+    // 1) Descision to change to left or right? should be made based on which side has a longer free distance.
+    // 2) sometimes does not slowdown when change lange to right!"
+
+
     // gradually decreas or increase the speed
     // to avoid jerk (both at the beginning and
     // when we are behind a car in our lane)
@@ -88,28 +93,7 @@ int BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, vecto
     } 
 
     return behavior;
-    
-    // if ( car_ahead ) { // Car ahead
-    //     if ( !car_left && lane > 0 ) {
-    //     // if there is no car left and there is a left lane.
-    //     lane--; // Change lane left.
-    //     } else if ( !car_righ && lane != 2 ){
-    //     // if there is no car right and there is a right lane.
-    //     lane++; // Change lane right.
-    //     } else {
-    //     speed_diff -= MAX_ACC;
-    //     }
-    // } else {
-    //     if ( lane != 1 ) { // if we are not on the center lane.
-    //         if ( ( lane == 0 && !car_righ ) || ( lane == 2 && !car_left ) ) {
-    //             lane = 1; // Back to center.
-    //         }
-    //     }
-    //     if ( ref_vel < MAX_SPEED ) {
-    //     speed_diff += MAX_ACC;
-    //     }
-    // }
-
+     
 }
 
 float BehaviorPlanner::calculate_cost(int behavior) 
