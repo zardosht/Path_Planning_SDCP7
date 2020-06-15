@@ -124,11 +124,12 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, i
 
     if (accel == Accel::ACCEL) {
         if (vel < MAX_SPEED) {  // convert v to mph for comparing
-            cout << "Increase speed by 0.224" << endl;
+            cout << "****** Speeding up" << endl;
             vel += 0.224;
         }
     } else if (accel == Accel::DECEL) {
         if (vel > 1) {
+            cout << "****** Slowing down" << endl;
             vel -= 0.224;
         }
     }
@@ -253,10 +254,12 @@ double TrajectoryGenerator::get_d(int behavior, Vehicle& egocar)
     int lane = egocar.get_lane();
     if (behavior & Behavior::ChangeLaneLeft) {
         if (lane > 0){
+            cout << "****** Changing lane to left" << endl;
             lane += -1;
         }
     } else if (behavior & Behavior::ChangeLaneRight) {
         if (lane < 3) {
+            cout << "****** Changing lane to right" << endl;
             lane += 1;
         }
     }
