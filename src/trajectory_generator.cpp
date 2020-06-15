@@ -215,7 +215,6 @@ void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, double start
     spline_knots(1, 3) = end_pt2[1];
     spline_knots(1, 4) = end_pt3[1];
 
-
 }
 
 void TrajectoryGenerator::transform_to_local(Array2Xd& spline_knots,  const double ref_x,  const double ref_y, const double ref_yaw)
@@ -265,7 +264,18 @@ double TrajectoryGenerator::get_d(int behavior, Vehicle& egocar)
         }
     }
 
-    return (2.0 + 4.0 * lane);
+    double d = (2.0 + 4.0 * lane);
+    
+    // this should never happen!
+    if (d > 11){
+        cout << "ERROR: d value too large! correcting to 10" << endl;
+        d = 10;
+    }
+    if (d < 1) {
+        cout << "ERROR: d value too small! correcting to 2" << endl;
+        d = 2;
+    }
+    return d;
 }   
 
 
