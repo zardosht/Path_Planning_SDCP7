@@ -20,6 +20,9 @@ class Vehicle
 
         int get_lane();
 
+        // return lane based on d value
+        static int get_lane(double d);
+
         //variables
         int id;
         double x, y, s, d, yaw, vx, vy, speed;

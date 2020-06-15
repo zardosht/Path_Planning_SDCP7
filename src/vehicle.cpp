@@ -29,6 +29,11 @@ Vehicle::~Vehicle() { }
 
 int Vehicle::get_lane()
 { 
+    return Vehicle::get_lane(this->d);
+}
+
+int Vehicle::get_lane(double d) 
+{
     if (d >= 0 && d < 4) 
         return 0;
     else if (d >= 4 && d < 8)

@@ -13,7 +13,7 @@ int BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, vecto
     //return Behavior::KeepLane;
 
     int prev_path_size = prev_path.size();
-    int lane = egocar.get_lane();
+    int ego_lane = egocar.get_lane();
     int behavior = Behavior::KeepLane;
 
     // where will our ego car be at the end of 
@@ -29,11 +29,11 @@ int BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, vecto
     // we get too close to it
     for (int i = 0; i < sensor_fusion.size(); ++i) 
     {
-        // get the d value of the car
-        float d = sensor_fusion[i][6];
+        // get the lane of other car based on its d value 
+        int other_car_lane = Vehicle::get_lane(sensor_fusion[i][6]);
 
         // check if a car is in our lane
-        if (d < (2 + 4.0 * lane + 2) && d > (2 + 4.0 * lane - 2)) 
+        if (other_car_lane == ego_lane) 
         {
             double vx = sensor_fusion[i][3];
             double vy = sensor_fusion[i][4];
@@ -57,7 +57,7 @@ int BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, vecto
                 too_close = true;
 
                 // change lane
-                if (lane > 0) 
+                if (ego_lane > 0) 
                 {
                     behavior = Behavior::ChangeLaneLeft;
                 }
