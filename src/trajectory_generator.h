@@ -17,7 +17,7 @@ using Eigen::Array2Xd;
 const int NUM_TRAJECTORY_POINTS = 50;
 
 // threshold to start planning a new trajectory; otherwise consume points from previous trajectory.
-const int PLAN_NEW_TRAJECTORY_THRESHOLD = 48;
+const int PLAN_NEW_TRAJECTORY_THRESHOLD = 50;
 
 // the simulator reachs (consumes) each point of trajectory in TIMESTEP
 const double TIMESTEP = 0.02;
@@ -71,7 +71,7 @@ class TrajectoryGenerator
 
         int get_accel(int behavior);
 
-        Trajectory generate_trajectory(Vehicle& egocar, double d, int accel, Trajectory& previous_path);
+        Trajectory generate_trajectory(Vehicle& egocar, double target_d, int accel, Trajectory& previous_path);
 
         void initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
 
@@ -83,7 +83,7 @@ class TrajectoryGenerator
 
         Map& map;
 
-        double vel = 0.224;
+        double vel = 0.0;
 
 };
 

@@ -42,7 +42,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(int behavior, Vehicle& egoca
     
     // find out the lane from behavior value
     // find out the acceleration from behavior value (ACCEL, ZERO, DECEL)
-    double d = get_d(behavior, egocar);
+    double target_d = get_d(behavior, egocar);
     int accel = get_accel(behavior);
 
     int prev_path_size = previous_path.size();
@@ -50,15 +50,28 @@ Trajectory TrajectoryGenerator::generate_trajectory(int behavior, Vehicle& egoca
         return previous_path;
 
     std::cout << "\nprevious path size: " << prev_path_size << std::endl;
-    return generate_trajectory(egocar, d, accel, previous_path);
+    return generate_trajectory(egocar, target_d, accel, previous_path);
 
 }
 
 
-Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, int accel, Trajectory& previous_path) 
+Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double target_d, int accel, Trajectory& previous_path) 
 {
 
     int prev_path_size = previous_path.size();
+
+    if (accel == Accel::ACCEL) {
+        if (vel < MAX_SPEED) {  // convert v to mph for comparing
+            cout << "****** Speeding up" << endl;
+            vel += 0.224;
+        }
+    } else if (accel == Accel::DECEL) {
+        if (vel > 1) {
+            cout << "****** Slowing down" << endl;
+            vel -= 0.224;
+        }
+    }
+
 
     // get initial spline knots
     // get initial yaw (for transforming the points
@@ -72,8 +85,8 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, i
     double ref_y = spline_knots(1, 1);
 
     cout << "egocar.s: " << egocar.s << endl;
-    double start_from_s = (prev_path_size < 2)? egocar.s : previous_path.end_s;
-    end_spline_points(spline_knots, start_from_s, d);
+    double start_from_s = (prev_path_size > 0)? previous_path.end_s : egocar.s;
+    end_spline_points(spline_knots, start_from_s, target_d);
 
     // transform spline knots into local coordinates
     transform_to_local(spline_knots, ref_x, ref_y, ref_yaw);
@@ -121,18 +134,6 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double d, i
     // double vel = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
     double vel_mps = vel / 2.24;   // current speed in m/s
     double num_points = target_dist / (TIMESTEP * vel_mps);
-
-    if (accel == Accel::ACCEL) {
-        if (vel < MAX_SPEED) {  // convert v to mph for comparing
-            cout << "****** Speeding up" << endl;
-            vel += 0.224;
-        }
-    } else if (accel == Accel::DECEL) {
-        if (vel > 1) {
-            cout << "****** Slowing down" << endl;
-            vel -= 0.224;
-        }
-    }
 
     double x_add_on = 0.0;
     for(int i = 1; i <= NUM_TRAJECTORY_POINTS - prev_path_size; i++) 
