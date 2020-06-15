@@ -78,7 +78,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double targ
     // into local coordinates and back to global coordinates)
     // get end spline knots
     Array2Xd spline_knots(2, 5);
-    double ref_yaw = 0.0;  //inout
+    double ref_yaw = deg2rad(egocar.yaw);  //inout
     initial_spline_points(spline_knots, egocar, previous_path, ref_yaw);
 
     double ref_x = spline_knots(0, 1);
@@ -166,8 +166,8 @@ void TrajectoryGenerator::initial_spline_points(Array2Xd& spline_knots, Vehicle&
     int prev_path_size = prev_path.size();
     if(prev_path_size < 2) 
     {
-        double prelast_x = egocar.x - cos(egocar.yaw);
-        double prelast_y = egocar.y - sin(egocar.yaw);
+        double prelast_x = egocar.x - cos(deg2rad(egocar.yaw));
+        double prelast_y = egocar.y - sin(deg2rad(egocar.yaw));
 
         spline_knots(0, 0) = prelast_x;
         spline_knots(0, 1) = egocar.x;
@@ -213,7 +213,7 @@ void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, double start
 
     spline_knots(1, 2) = end_pt1[1];
     spline_knots(1, 3) = end_pt2[1];
-    spline_knots(1, 4) = end_pt2[1];
+    spline_knots(1, 4) = end_pt3[1];
 
 
 }
