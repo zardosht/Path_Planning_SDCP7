@@ -13,7 +13,7 @@ struct Trajectory;
 
 const double FRONT_GAP = 40;
 const double LANE_CHANGE_GAP_FRONT = 15;
-const double LANE_CHANGE_GAP_REAR = 10;
+const double LANE_CHANGE_GAP_REAR = -10;
 
 struct Prediction 
 {
