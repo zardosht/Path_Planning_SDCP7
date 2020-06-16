@@ -67,7 +67,6 @@ int BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, vecto
         }
     }
 
-
     // 1) Descision to change to left or right? should be made based on which side has a longer free distance.
     // 2) sometimes does not slowdown when change lange to right!"
 
@@ -87,7 +86,7 @@ int BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, vecto
     if (too_close) {
         if (ego_lane > 0 && !car_in_left) {
             behavior = Behavior::ChangeLaneLeft;
-        } else if (ego_lane < 3 && !car_in_right) {
+        } else if (ego_lane < 2 && !car_in_right) {
             behavior = Behavior::ChangeLaneRight | Behavior::SlowDown;
         } 
     } 

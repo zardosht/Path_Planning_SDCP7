@@ -258,7 +258,7 @@ double TrajectoryGenerator::get_d(int behavior, Vehicle& egocar)
             lane += -1;
         }
     } else if (behavior & Behavior::ChangeLaneRight) {
-        if (lane < 3) {
+        if (lane < 2) {
             cout << "****** Changing lane to right" << endl;
             lane += 1;
         }
