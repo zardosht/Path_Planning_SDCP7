@@ -49,7 +49,6 @@ Trajectory TrajectoryGenerator::generate_trajectory(int behavior, Vehicle& egoca
     if (prev_path_size >= PLAN_NEW_TRAJECTORY_THRESHOLD) 
         return previous_path;
 
-    std::cout << "\nprevious path size: " << prev_path_size << std::endl;
     return generate_trajectory(egocar, target_d, accel, previous_path);
 
 }
@@ -84,7 +83,6 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double targ
     double ref_x = spline_knots(0, 1);
     double ref_y = spline_knots(1, 1);
 
-    cout << "egocar.s: " << egocar.s << endl;
     double start_from_s = (prev_path_size > 0)? previous_path.end_s : egocar.s;
     end_spline_points(spline_knots, start_from_s, target_d);
 
@@ -92,7 +90,6 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double targ
     transform_to_local(spline_knots, ref_x, ref_y, ref_yaw);
 
     // prepare spline
-    cout << "spline_knots: \n" << spline_knots << endl;
     tk::spline spl;
     vector<double> knot_xs(spline_knots.cols());
     vector<double> knot_ys(spline_knots.cols());
@@ -150,7 +147,6 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double targ
     
     }
 
-    cout << "Num Trajectory points: " << trajectory.size() << endl;
     return trajectory;
     
 }
@@ -189,16 +185,12 @@ void TrajectoryGenerator::initial_spline_points(Array2Xd& spline_knots, Vehicle&
         spline_knots(1, 1) = last_y;
 
         ref_yaw = atan2(last_y - prelast_y, last_x - prelast_x);
-        cout << "ref_yaw: " << ref_yaw << endl;
     }
 
 }
 
 void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, double start_from_s, double target_d)
 {
-    cout << "start_from_s: " << start_from_s << endl;
-    
-
     // end knot points for the spline
     // pick points in the far distance to
     // have a smooth spline

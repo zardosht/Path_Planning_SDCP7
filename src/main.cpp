@@ -8,6 +8,7 @@
 #include "json.hpp"
 
 #include "map.h"
+#include "prediction.h"
 #include "behavior_planner.h"
 #include "trajectory_generator.h"
 
@@ -44,14 +45,12 @@ int main() {
   // The max s value before wrapping around the track back to 0
   double max_s = 6945.554;
 
-  // int lane = 1;
-  // double ref_vel = 0.0;  //mph
-
-  TrajectoryGenerator tg(map);
+  Prediction pred;
   BehaviorPlanner bp;
+  TrajectoryGenerator tg(map);
 
 
-  h.onMessage([&map, &bp, &tg]
+  h.onMessage([&map, &pred, &bp, &tg]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -101,11 +100,12 @@ int main() {
           previous_path.ys.assign(previous_path_y.begin(), previous_path_y.end());
           previous_path.end_s = end_path_s;
           previous_path.end_d = end_path_d;
-
+          
           Vehicle ego_car(EGOCAR_ID, car_x, car_y, car_s, car_d, car_yaw);
           ego_car.speed = car_speed;
 
-          int behavior = bp.next_behavior(ego_car, previous_path, sensor_fusion);
+          pred.update(sensor_fusion, ego_car, previous_path);
+          int behavior = bp.next_behavior(ego_car, previous_path, pred);
           Trajectory trajectory = tg.generate_trajectory(behavior, ego_car, previous_path);
 
 

@@ -6,8 +6,11 @@
 
 #include "vehicle.h"
 #include "trajectory_generator.h"
+#include "prediction.h"
 
 using std::vector;
+
+struct Prediction;
 
 enum Behavior {
     // same lane, do not change speed
@@ -33,7 +36,7 @@ class BehaviorPlanner {
         ~BehaviorPlanner();
 
         //functions
-        int next_behavior(Vehicle& egocar, Trajectory& prev_path, vector<vector<double>>& sensor_fusion);
+        int next_behavior(Vehicle& egocar, Trajectory& prev_path, Prediction& pred);
 
 
         // variables

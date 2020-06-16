@@ -1,6 +1,8 @@
 #include "vehicle.h"
 
 
+Vehicle::~Vehicle() { }
+
 Vehicle::Vehicle(const int id, double x, double y, double s, double d, double yaw)
 {
     this->id = id;
@@ -24,8 +26,6 @@ Vehicle::Vehicle(int id, double x, double y, double vx, double vy, double s, dou
     this->d = d;
 
 }
-
-Vehicle::~Vehicle() { }
 
 int Vehicle::get_lane()
 { 

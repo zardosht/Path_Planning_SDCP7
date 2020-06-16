@@ -2,6 +2,8 @@
     "files.associations": {
         "functional": "cpp",
         "algorithm": "cpp",
-        "tmp": "cpp"
+        "tmp": "cpp",
+        "vector": "cpp",
+        "*.tcc": "cpp"
     }
 }
