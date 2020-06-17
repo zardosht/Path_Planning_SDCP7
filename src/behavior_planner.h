@@ -46,7 +46,7 @@ class BehaviorPlanner {
 
     
     private: 
-        void update_costs();
+        void update_costs(Prediction& pred);
 
        
 }; 

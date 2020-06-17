@@ -69,6 +69,8 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double targ
             cout << "****** Slowing down" << endl;
             vel -= 0.224;
         }
+    } else {
+        cout << "****** Keep Speed" << endl;
     }
 
 

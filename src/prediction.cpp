@@ -46,7 +46,7 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
         if (lanediff == 0) {
             // other car in our lane.
             too_close |= dist > 0 && dist < FRONT_GAP;
-            if (dist > 0 && dist_front_right > dist) {
+            if (dist > 0 && dist_front > dist) {
                 dist_front = dist;
             }
         } else if(lanediff == -1) {

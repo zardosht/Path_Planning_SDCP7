@@ -1,5 +1,6 @@
 #include "behavior_planner.h"
 #include <iostream>
+#include <math.h>
 
 using std::cout;
 using std::endl;
@@ -49,7 +50,7 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
     // 2) sometimes does not slowdown when change lange to right!"
 
 
-    update_costs();
+    update_costs(pred);
 
     // gradually decreas or increase the speed
     // to avoid jerk (both at the beginning and
@@ -77,23 +78,42 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
 }
 
 
-void BehaviorPlanner::update_costs() 
+void BehaviorPlanner::update_costs(Prediction& pred) 
 {
 
     double min_cost = LARGE_NUMBER;
+    cout << "*********** pred.dist_front = " << pred.dist_front << endl;
+
     for(const auto pair : behaviors) {
         int name = pair.first;
         Behavior behavior = pair.second;
+        behavior.cost = LARGE_NUMBER;
         switch (name)
         {
         case BehaviorNames::KeepLane:
-                  
+            // keep_lane, speed_up, and slow_down all depend on the distance between us and the front car.
+            if (pred.dist_front >= 30 && pred.dist_front <= 70) {
+                behavior.cost = 3;    
+            } else {
+                behavior.cost = 10;
+            }
             break;
         case BehaviorNames::SpeedUp:
+            if (pred.dist_front > 70){
+                behavior.cost = 5;
+            }else
+            {
+                behavior.cost = 10;
+            }
             
             break;
         case BehaviorNames::SlowDown:
-            
+            if (pred.dist_front < 50){
+                behavior.cost = 5;
+            }else {
+                behavior.cost = 10;
+            }
+        
             break;
         case BehaviorNames::ChangeLaneLeft:
             
