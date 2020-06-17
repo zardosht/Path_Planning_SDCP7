@@ -11,11 +11,11 @@ using std::vector;
 
 struct Trajectory;
 
-const double TOO_CLOSE_GAP = 40;
-const double LANE_CHANGE_GAP_FRONT = 15;
+const double TOO_CLOSE_GAP = 30;
+const double LANE_CHANGE_GAP_FRONT = 31;
 const double LANE_CHANGE_GAP_REAR = -10;
 
-const double LARGE_NUMBER = 100000;
+const double LARGE_NUMBER = 10000000000;
 
 struct Prediction 
 {
