@@ -11,7 +11,7 @@ using std::vector;
 
 struct Trajectory;
 
-const double FRONT_GAP = 40;
+const double TOO_CLOSE_GAP = 40;
 const double LANE_CHANGE_GAP_FRONT = 15;
 const double LANE_CHANGE_GAP_REAR = -10;
 
@@ -22,6 +22,7 @@ struct Prediction
     public:
         bool too_close;
         double dist_front;
+        bool follow;
         
         bool car_left;
         double dist_front_left;

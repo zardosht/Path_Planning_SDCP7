@@ -43,7 +43,7 @@ class BehaviorPlanner {
 
         map<int, Behavior> behaviors; 
         Behavior best_behavior;
-
+        
     
     private: 
         void update_costs(Prediction& pred);

@@ -91,32 +91,29 @@ void BehaviorPlanner::update_costs(Prediction& pred)
         switch (name)
         {
         case BehaviorNames::KeepLane:
-            // keep_lane, speed_up, and slow_down all depend on the distance between us and the front car.
-            if (pred.dist_front >= 30 && pred.dist_front <= 70) {
-                behavior.cost = 3;    
+            break;
+
+        case BehaviorNames::SpeedUp:
+            if (!pred.too_close){
+                behavior.cost = 5;
             } else {
                 behavior.cost = 10;
             }
             break;
-        case BehaviorNames::SpeedUp:
-            if (pred.dist_front > 70){
-                behavior.cost = 5;
-            }else
-            {
-                behavior.cost = 10;
-            }
-            
-            break;
+
         case BehaviorNames::SlowDown:
-            if (pred.dist_front < 50){
+            if (pred.too_close){
                 behavior.cost = 5;
-            }else {
+            } else {
                 behavior.cost = 10;
             }
-        
             break;
+
         case BehaviorNames::ChangeLaneLeft:
             
+
+
+
             break;
         case BehaviorNames::ChangeLaneRight:
             
