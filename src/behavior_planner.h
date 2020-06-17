@@ -46,7 +46,7 @@ class BehaviorPlanner {
         
     
     private: 
-        void update_costs(Prediction& pred);
+        void update_costs(Prediction& pred, Vehicle& egocar);
 
        
 }; 

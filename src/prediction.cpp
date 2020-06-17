@@ -21,7 +21,7 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
 
     car_left = false;
     dist_front_left = (ego_lane == 0)? -1.0 : LARGE_NUMBER;
-
+ 
     car_right = false;
     dist_front_right = (ego_lane == 2)? -1.0 : LARGE_NUMBER;
 
