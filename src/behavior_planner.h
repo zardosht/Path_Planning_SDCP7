@@ -14,15 +14,15 @@ struct Prediction;
 
 enum BehaviorNames {
     // same lane, do not change speed
-    KeepLane = 1<<0, // 1
+    KeepLane,
     // keep lane (same lane) and decrease speed
-    SlowDown = 1<<1, // 2
+    SlowDown,
     // keep lane (same lane) and increase speed
-    SpeedUp = 1<<2,  // 4
+    SpeedUp,
     // change lane right (increase d) and decrease speed
-    ChangeLaneRight = 1<<3,  // 8
+    ChangeLaneRight,
     // change lane left (decrease d) and increase speed
-    ChangeLaneLeft = 1<<4 // 16
+    ChangeLaneLeft
 };
 
 struct Behavior {

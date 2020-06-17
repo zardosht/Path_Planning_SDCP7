@@ -9,12 +9,13 @@ BehaviorPlanner::BehaviorPlanner()
 {
     Behavior keep_lane;
     keep_lane.name = BehaviorNames::KeepLane;
-    keep_lane.cost = 0.0;
+    keep_lane.cost = LARGE_NUMBER;
     behaviors[BehaviorNames::KeepLane] = keep_lane;
 
     Behavior speed_up;
     speed_up.name = BehaviorNames::SpeedUp;
-    speed_up.cost = LARGE_NUMBER;
+    //speed_up.cost = LARGE_NUMBER;
+    speed_up.cost = 0.0;
     behaviors[BehaviorNames::SpeedUp] = speed_up;
 
     Behavior slow_down;
@@ -75,9 +76,41 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
      
 }
 
+
 void BehaviorPlanner::update_costs() 
 {
 
+    double min_cost = LARGE_NUMBER;
+    for(const auto pair : behaviors) {
+        int name = pair.first;
+        Behavior behavior = pair.second;
+        switch (name)
+        {
+        case BehaviorNames::KeepLane:
+                  
+            break;
+        case BehaviorNames::SpeedUp:
+            
+            break;
+        case BehaviorNames::SlowDown:
+            
+            break;
+        case BehaviorNames::ChangeLaneLeft:
+            
+            break;
+        case BehaviorNames::ChangeLaneRight:
+            
+            break;
+
+        default:
+            break;
+        }
+
+        if(min_cost > behavior.cost) {
+            min_cost = behavior.cost;
+            best_behavior = behavior;
+        }
+    }
 }
 
 
