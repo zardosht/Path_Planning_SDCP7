@@ -2,17 +2,17 @@
 #define BEHAVIOR_PLANNER_H
 
 #include <math.h>
-#include <vector>
+#include <map>
 
 #include "vehicle.h"
 #include "trajectory_generator.h"
 #include "prediction.h"
 
-using std::vector;
+using std::map;
 
 struct Prediction;
 
-enum Behavior {
+enum BehaviorNames {
     // same lane, do not change speed
     KeepLane = 1<<0, // 1
     // keep lane (same lane) and decrease speed
@@ -25,25 +25,28 @@ enum Behavior {
     ChangeLaneLeft = 1<<4 // 16
 };
 
+struct Behavior {
+    int name;
+    double cost;
+};
+
 struct Trajectory; 
 
 class BehaviorPlanner {
    public: 
-        //constructor
+
         BehaviorPlanner();
 
-        //desctructor
         ~BehaviorPlanner();
 
-        //functions
-        int next_behavior(Vehicle& egocar, Trajectory& prev_path, Prediction& pred);
+        Behavior next_behavior(Vehicle& egocar, Trajectory& prev_path, Prediction& pred);
 
+        map<int, Behavior> behaviors; 
+        Behavior best_behavior;
 
-        // variables
-        int current_behavior; 
     
     private: 
-        float calculate_cost(int behavior);
+        void update_costs();
 
        
 }; 

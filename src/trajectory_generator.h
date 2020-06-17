@@ -38,6 +38,7 @@ enum Accel
     DECEL
 };
 
+struct Behavior;
 
 struct Trajectory  
 {
@@ -61,15 +62,15 @@ class TrajectoryGenerator
         ~TrajectoryGenerator();
 
         // functions
-        Trajectory generate_trajectory(int behavior, Vehicle& vehicle, Trajectory& previous_path);
+        Trajectory generate_trajectory(Behavior behavior, Vehicle& vehicle, Trajectory& previous_path);
 
         // variables
 
     private:
 
-        double get_d(int behavior, Vehicle& egocar); 
+        double get_d(Behavior behavior, Vehicle& egocar); 
 
-        int get_accel(int behavior);
+        int get_accel(Behavior behavior);
 
         Trajectory generate_trajectory(Vehicle& egocar, double target_d, int accel, Trajectory& previous_path);
 

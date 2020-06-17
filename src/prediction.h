@@ -15,6 +15,8 @@ const double FRONT_GAP = 40;
 const double LANE_CHANGE_GAP_FRONT = 15;
 const double LANE_CHANGE_GAP_REAR = -10;
 
+const double LARGE_NUMBER = 100000;
+
 struct Prediction 
 {
     public:

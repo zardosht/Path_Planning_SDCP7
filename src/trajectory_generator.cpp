@@ -15,7 +15,7 @@ TrajectoryGenerator::TrajectoryGenerator(Map& map) : map(map)
 TrajectoryGenerator::~TrajectoryGenerator() {}
 
 
-Trajectory TrajectoryGenerator::generate_trajectory(int behavior, Vehicle& egocar, Trajectory& previous_path)
+Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& egocar, Trajectory& previous_path)
 {
     
 
@@ -240,16 +240,16 @@ vector<double> TrajectoryGenerator::transform_to_global(const double x_local, co
 }
 
 
-double TrajectoryGenerator::get_d(int behavior, Vehicle& egocar) 
+double TrajectoryGenerator::get_d(Behavior behavior, Vehicle& egocar) 
 {
     // find current lane
     int lane = egocar.get_lane();
-    if (behavior & Behavior::ChangeLaneLeft) {
+    if (behavior.name == BehaviorNames::ChangeLaneLeft) {
         if (lane > 0){
             cout << "****** Changing lane to left" << endl;
             lane += -1;
         }
-    } else if (behavior & Behavior::ChangeLaneRight) {
+    } else if (behavior.name == BehaviorNames::ChangeLaneRight) {
         if (lane < 2) {
             cout << "****** Changing lane to right" << endl;
             lane += 1;
@@ -271,16 +271,16 @@ double TrajectoryGenerator::get_d(int behavior, Vehicle& egocar)
 }   
 
 
-int TrajectoryGenerator::get_accel(int behavior)
+int TrajectoryGenerator::get_accel(Behavior behavior)
 {
     // SlowDown = keep lane (same lane) and decrease speed
     // SpeedUp = keep lane (same lane) and increase speed
     // KeepLane = same lane, do not change speed
     // ChangeLaneRight = change lane right (increase d) do not change speed
     // ChangeLaneLeft = change lane left (decrease d) do not change speed
-    if (behavior & Behavior::SpeedUp) {
+    if (behavior.name == BehaviorNames::SpeedUp) {
         return Accel::ACCEL;
-    } else if (behavior & Behavior::SlowDown){
+    } else if (behavior.name == BehaviorNames::SlowDown){
         return Accel::DECEL;
     } else {
         return Accel::ZERO;

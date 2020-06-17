@@ -6,7 +6,6 @@
 using std::cout;
 using std::endl;
 
-const double LARGE_NUMBER = 100000;
 
 void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, Trajectory& prev_path)
 {
@@ -20,9 +19,9 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
     too_close = false;
     dist_front = LARGE_NUMBER;
     car_left = false;
-    dist_front_left = LARGE_NUMBER;
+    dist_front_left = (ego_lane == 0)? -1.0 : LARGE_NUMBER;
     car_right = false;
-    dist_front_right = LARGE_NUMBER;
+    dist_front_right = (ego_lane == 2)? -1.0 : LARGE_NUMBER;
 
     for (int i = 0; i < sensor_fusion.size(); ++i)
     {

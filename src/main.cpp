@@ -105,7 +105,7 @@ int main() {
           ego_car.speed = car_speed;
 
           pred.update(sensor_fusion, ego_car, previous_path);
-          int behavior = bp.next_behavior(ego_car, previous_path, pred);
+          Behavior behavior = bp.next_behavior(ego_car, previous_path, pred);
           Trajectory trajectory = tg.generate_trajectory(behavior, ego_car, previous_path);
 
 
