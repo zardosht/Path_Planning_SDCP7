@@ -42,6 +42,9 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
         car.s += (double)prev_path_size * 0.02 * car_speed;
         int car_lane = car.get_lane();
   
+        double max_speed = 48.5; //mph
+        double rear_gap = LANE_CHANGE_GAP_REAR + 3 * egocar.speed / max_speed;
+        double front_gap = LANE_CHANGE_GAP_FRONT - 10 * egocar.speed / max_speed;
         // distance from ego car to the car in front of us
         double dist = car.s - ego_s;
         int lanediff = car_lane - ego_lane; 
@@ -53,13 +56,13 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
             }
         } else if(lanediff == -1) {
             // other car in left lane
-            car_left |= LANE_CHANGE_GAP_REAR < dist && dist < LANE_CHANGE_GAP_FRONT;
+            car_left |= rear_gap < dist && dist < front_gap;
             if(dist > 0 && dist_front_left > dist) {
                 dist_front_left = dist;
             }
         } else if (lanediff == 1) {
             // other car in right lane
-            car_right |= LANE_CHANGE_GAP_REAR < dist && dist < LANE_CHANGE_GAP_FRONT;
+            car_right |= rear_gap < dist && dist < front_gap;
             if(dist > 0 && dist_front_right > dist) {
                 dist_front_right = dist;
             }

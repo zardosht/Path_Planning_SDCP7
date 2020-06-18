@@ -86,7 +86,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double targ
     double ref_y = spline_knots(1, 1);
 
     double start_from_s = (prev_path_size > 0)? previous_path.end_s : egocar.s;
-    end_spline_points(spline_knots, start_from_s, target_d);
+    end_spline_points(spline_knots, egocar, start_from_s, target_d);
 
     // transform spline knots into local coordinates
     transform_to_local(spline_knots, ref_x, ref_y, ref_yaw);
@@ -191,14 +191,15 @@ void TrajectoryGenerator::initial_spline_points(Array2Xd& spline_knots, Vehicle&
 
 }
 
-void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, double start_from_s, double target_d)
+void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, Vehicle& egocar, double start_from_s, double target_d)
 {
     // end knot points for the spline
     // pick points in the far distance to
     // have a smooth spline
-    vector<double> end_pt1 = map.get_xy(start_from_s + 30, target_d);
-    vector<double> end_pt2 = map.get_xy(start_from_s + 60, target_d);
-    vector<double> end_pt3 = map.get_xy(start_from_s + 90, target_d);
+    double factor = egocar.speed < 10? 1 : egocar.speed / MAX_SPEED;
+    vector<double> end_pt1 = map.get_xy(start_from_s + factor * 30, target_d);
+    vector<double> end_pt2 = map.get_xy(start_from_s + factor * 60, target_d);
+    vector<double> end_pt3 = map.get_xy(start_from_s + factor * 90, target_d);
 
     //spline_knots already includes the two begining points
     spline_knots(0, 2) = end_pt1[0];

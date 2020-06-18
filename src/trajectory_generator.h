@@ -76,7 +76,7 @@ class TrajectoryGenerator
 
         void initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
 
-        void end_spline_points(Array2Xd& spline_knots, double start_from_s, double target_d);
+        void end_spline_points(Array2Xd& spline_knots, Vehicle& egocar, double start_from_s, double target_d);
 
         void transform_to_local(Array2Xd& spline_knots, const double ref_x, const double ref_y, const double ref_yaw);
 
