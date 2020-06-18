@@ -17,63 +17,20 @@ TrajectoryGenerator::~TrajectoryGenerator() {}
 
 Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& egocar, Trajectory& previous_path)
 {
-    
-
-    // the prediction gives the predicted trajectory of other cars (check the github repo)
-
-    // the behavior planner checks for each behavior if collides with other cars or goes out of road 
-
-    // the behavior gives the target lane and the speed (increas or decrease)
-    // Or the behavior gives lane and acceleration? (because acceleration is the measure of how to increase or decrese speed)
-    // there will be following behaviors:
-    //     SlowDown = keep lane (same lane) and decrease speed
-    //     SpeedUp = keep lane (same lane) and increase speed
-    //     KeepLane = same lane, do not change speed
-    //     ChangeLaneRight = change lane right (increase d) and increase speed
-    //     ChangeLaneLeft = change lane left (decrease d) and increase speed
-
-    
-    // generate_trajectory(lane, accel[DECEL, ZERO, ACCEL], previous_path)
-    //        prepares spline points for the given lane
-    //        addds the points from previous path
-    //        uses the spline to generate points for the trajectory
-    
-    
-    
     // find out the lane from behavior value
     // find out the acceleration from behavior value (ACCEL, ZERO, DECEL)
-    double target_d = get_d(behavior, egocar);
-    int accel = get_accel(behavior);
-
+    
     int prev_path_size = previous_path.size();
     if (prev_path_size >= PLAN_NEW_TRAJECTORY_THRESHOLD) 
         return previous_path;
 
-    return generate_trajectory(egocar, target_d, accel, previous_path);
+    double target_d = get_d(behavior, egocar);
 
-}
-
-
-Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double target_d, int accel, Trajectory& previous_path) 
-{
-
-    int prev_path_size = previous_path.size();
-
-    if (accel == Accel::ACCEL) {
-        if (vel < MAX_SPEED) {  // convert v to mph for comparing
-            cout << "****** Speeding up" << endl;
-            vel += 0.224;
-        }
-    } else if (accel == Accel::DECEL) {
-        if (vel > 1) {
-            cout << "****** Slowing down" << endl;
-            vel -= 0.224;
-        }
-    } else {
-        cout << "****** Keep Speed" << endl;
+    vel += behavior.accel * 0.224;
+    if (vel > MAX_SPEED) {  // convert v to mph for comparing
+        vel = MAX_SPEED;
     }
-
-
+   
     // get initial spline knots
     // get initial yaw (for transforming the points
     // into local coordinates and back to global coordinates)
@@ -150,7 +107,8 @@ Trajectory TrajectoryGenerator::generate_trajectory(Vehicle& egocar, double targ
     }
 
     return trajectory;
-    
+
+
 }
 
 // Returns the two points to start the new trajectory from. 
@@ -196,7 +154,9 @@ void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, Vehicle& ego
     // end knot points for the spline
     // pick points in the far distance to
     // have a smooth spline
-    double factor = egocar.speed < 10? 1 : egocar.speed / MAX_SPEED;
+    
+    //double factor = egocar.speed < 10? 1 : egocar.speed / MAX_SPEED;
+    double factor = 1.0;
     vector<double> end_pt1 = map.get_xy(start_from_s + factor * 30, target_d);
     vector<double> end_pt2 = map.get_xy(start_from_s + factor * 60, target_d);
     vector<double> end_pt3 = map.get_xy(start_from_s + factor * 90, target_d);
@@ -246,19 +206,9 @@ vector<double> TrajectoryGenerator::transform_to_global(const double x_local, co
 double TrajectoryGenerator::get_d(Behavior behavior, Vehicle& egocar) 
 {
     // find current lane
-    int lane = egocar.get_lane();
-    if (behavior.name == BehaviorNames::ChangeLaneLeft) {
-        if (lane > 0){
-            cout << "****** Changing lane to left" << endl;
-            lane += -1;
-        }
-    } else if (behavior.name == BehaviorNames::ChangeLaneRight) {
-        if (lane < 2) {
-            cout << "****** Changing lane to right" << endl;
-            lane += 1;
-        }
-    }
-
+    int lane = egocar.get_lane() + behavior.lane;
+    if (lane < 0) lane = 0;
+    if (lane > 2) lane = 2;
     double d = (2.0 + 4.0 * lane);
     
     // this should never happen!
@@ -274,18 +224,4 @@ double TrajectoryGenerator::get_d(Behavior behavior, Vehicle& egocar)
 }   
 
 
-int TrajectoryGenerator::get_accel(Behavior behavior)
-{
-    // SlowDown = keep lane (same lane) and decrease speed
-    // SpeedUp = keep lane (same lane) and increase speed
-    // KeepLane = same lane, do not change speed
-    // ChangeLaneRight = change lane right (increase d) do not change speed
-    // ChangeLaneLeft = change lane left (decrease d) do not change speed
-    if (behavior.name == BehaviorNames::SpeedUp) {
-        return Accel::ACCEL;
-    } else if (behavior.name == BehaviorNames::SlowDown){
-        return Accel::DECEL;
-    } else {
-        return Accel::ZERO;
-    }
-}
+

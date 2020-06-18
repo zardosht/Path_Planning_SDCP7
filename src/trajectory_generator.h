@@ -24,22 +24,6 @@ const double TIMESTEP = 0.02;
 
 const double MAX_SPEED = 48.5;  // mph
 
-
-// Defines general accleration values
-// The behavior planner only tells if 
-// trajectory generator shoule accelerate, 
-// keep the speed, or deccelrate. 
-// It is the responsibility of the trajectory
-// generator to define proper values for acceleration
-enum Accel 
-{
-    ACCEL, 
-    ZERO, 
-    DECEL
-};
-
-struct Behavior;
-
 struct Trajectory  
 {
     vector<double> xs;
@@ -51,6 +35,8 @@ struct Trajectory
     int size() {return xs.size();}
 
 };
+
+struct Behavior;
 
 class TrajectoryGenerator 
 {
@@ -69,10 +55,6 @@ class TrajectoryGenerator
     private:
 
         double get_d(Behavior behavior, Vehicle& egocar); 
-
-        int get_accel(Behavior behavior);
-
-        Trajectory generate_trajectory(Vehicle& egocar, double target_d, int accel, Trajectory& previous_path);
 
         void initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
 
