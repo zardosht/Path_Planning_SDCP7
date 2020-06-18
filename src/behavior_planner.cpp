@@ -67,7 +67,7 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
     //         behavior = Behavior::ChangeLaneRight | Behavior::SlowDown;
     //     } 
     // } 
-
+    cout << "*********** best_behavior.name: " <<  best_behavior.name << endl;
     return best_behavior;
      
 }
@@ -102,32 +102,34 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
             if(!pred.too_close) {
                 behavior.cost = 0;
             } else {
-                behavior.cost = 1;
+                behavior.cost = 0.5;
             }
             break;
 
         case BehaviorNames::SlowDown:
-            if (pred.too_close) {
+            if (pred.too_close && 
+               !(best_behavior.name == BehaviorNames::ChangeLaneLeft || best_behavior.name == BehaviorNames::ChangeLaneRight)) {
+                // do not slow down if we are changing lanes.    
                 cout << "*********** pred.dist_front = " << pred.dist_front << endl;
                 cout << "*********** slow down cost: " << 0 << endl; 
                 behavior.cost = 0;
             } else {
-                behavior.cost = 1;
+                behavior.cost = 0.5;
             }
 
             break;
 
         case BehaviorNames::ChangeLaneLeft:
-            if (pred.too_close && !pred.car_left) {
+            if (pred.too_close && !pred.car_left) { 
                 cout << "*********** pred.dist_front = " << pred.dist_front << endl;
-                cout << "*********** change lane left cost: " << -pred.dist_front_left << endl; 
+                cout << "*********** change lane left cost: " << -pred.dist_front_left - 0.1 << endl; 
                 // if both options of going left and right are good, prefer to go left
                 behavior.cost = -pred.dist_front_left - 0.1;  
             }
             break;
 
         case BehaviorNames::ChangeLaneRight:
-            if (pred.too_close && !pred.car_right) {
+            if (pred.too_close && !pred.car_right) { 
                 cout << "*********** pred.dist_front = " << pred.dist_front << endl;
                 cout << "*********** change lane right cost: " << -pred.dist_front_right << endl;
                 behavior.cost = -pred.dist_front_right;  
