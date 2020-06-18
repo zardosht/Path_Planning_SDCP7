@@ -4,6 +4,7 @@
         "algorithm": "cpp",
         "tmp": "cpp",
         "vector": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "iostream": "cpp"
     }
 }

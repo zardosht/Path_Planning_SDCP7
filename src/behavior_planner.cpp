@@ -77,12 +77,17 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
 {
 
     double min_cost = LARGE_NUMBER;
-    cout << "*********** pred.dist_front = " << pred.dist_front << endl;
 
     if(egocar.speed == 0) {
         best_behavior = behaviors[BehaviorNames::SpeedUp];
         return;
     }
+
+    //////// 
+    //////////
+    ///////////  Check the log file to investigate why it dances
+    ///////////  add the guard for dancing
+    ///////////  play around with rest of path size .
 
     for(const auto pair : behaviors) {
         int name = pair.first;
@@ -94,18 +99,27 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
             break;
 
         case BehaviorNames::SpeedUp:
-            behavior.cost = (pred.too_close) * 1 / pred.dist_front;
+            if(!pred.too_close) {
+                behavior.cost = 0;
+            } else {
+                behavior.cost = 1;
+            }
             break;
 
         case BehaviorNames::SlowDown:
-            cout << "*********** 1- too close: " << 1 - pred.too_close << endl; 
-            cout << "*********** speed up cost: " << (pred.too_close) * 1 / pred.dist_front << endl; 
-            cout << "*********** slow down cost: " << (1 - pred.too_close) * 1 / pred.dist_front << endl;
-            behavior.cost = (1 - pred.too_close) * 1 / pred.dist_front;
+            if (pred.too_close) {
+                cout << "*********** pred.dist_front = " << pred.dist_front << endl;
+                cout << "*********** slow down cost: " << 0 << endl; 
+                behavior.cost = 0;
+            } else {
+                behavior.cost = 1;
+            }
+
             break;
 
         case BehaviorNames::ChangeLaneLeft:
             if (pred.too_close && !pred.car_left) {
+                cout << "*********** pred.dist_front = " << pred.dist_front << endl;
                 cout << "*********** change lane left cost: " << -pred.dist_front_left << endl; 
                 // if both options of going left and right are good, prefer to go left
                 behavior.cost = -pred.dist_front_left - 0.1;  
@@ -114,6 +128,7 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
 
         case BehaviorNames::ChangeLaneRight:
             if (pred.too_close && !pred.car_right) {
+                cout << "*********** pred.dist_front = " << pred.dist_front << endl;
                 cout << "*********** change lane right cost: " << -pred.dist_front_right << endl;
                 behavior.cost = -pred.dist_front_right;  
             }
