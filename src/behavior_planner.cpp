@@ -40,34 +40,7 @@ BehaviorPlanner::~BehaviorPlanner() {}
 Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, Prediction& pred) 
 {
     int ego_lane = egocar.get_lane();
-   
-    // 1) Descision to change to left or right? should be made based on which side has a longer free distance.
-    // 2) sometimes does not slowdown when change lange to right!"
-
-
     update_costs(pred, egocar);
-
-    // gradually decreas or increase the speed
-    // to avoid jerk (both at the beginning and
-    // when we are behind a car in our lane)
-
-    // if(pred.too_close) {
-    //     std::cout << "****************** too close!" << std::endl;
-    //     behavior |= Behavior::SlowDown;
-    // } else {
-    //     if (egocar.speed < 49.5){
-    //         behavior |= Behavior::SpeedUp;
-    //     }
-    // }
-
-    // if (pred.too_close) {
-    //     if (ego_lane > 0 && !pred.car_left) {
-    //         behavior = Behavior::ChangeLaneLeft;
-    //     } else if (ego_lane < 2 && !pred.car_right) {
-    //         behavior = Behavior::ChangeLaneRight | Behavior::SlowDown;
-    //     } 
-    // } 
-    cout << "*********** best_behavior.name: " <<  best_behavior.name << endl;
     return best_behavior;
      
 }
@@ -82,12 +55,6 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
         best_behavior = behaviors[BehaviorNames::SpeedUp];
         return;
     }
-
-    //////// 
-    //////////
-    ///////////  Check the log file to investigate why it dances
-    ///////////  add the guard for dancing
-    ///////////  play around with rest of path size .
 
     for(const auto pair : behaviors) {
         int name = pair.first;
@@ -107,8 +74,10 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
             break;
 
         case BehaviorNames::SlowDown:
-            if (pred.too_close && 
-               !(best_behavior.name == BehaviorNames::ChangeLaneLeft || best_behavior.name == BehaviorNames::ChangeLaneRight)) {
+            if (best_behavior.name == BehaviorNames::ChangeLaneLeft || best_behavior.name == BehaviorNames::ChangeLaneRight) {
+                // do not slow down if we are changing lanes.    
+                behavior.cost = 0.5;
+            } else if (pred.too_close) {
                 // do not slow down if we are changing lanes.    
                 cout << "*********** pred.dist_front = " << pred.dist_front << endl;
                 cout << "*********** slow down cost: " << 0 << endl; 
