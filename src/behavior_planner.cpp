@@ -77,11 +77,14 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
         return;
     }
 
+    // get behaviors that are allowed from this behavior
+    vector<string> next_bs = successor_behaviors(best_behavior);
+
     double coll_cost_w = 1;
     double speed_cost_w = 1;
-    for (auto &pair : behaviors)
+    for (string& b_name : next_bs)
     {
-        Behavior& behavior = pair.second;
+        Behavior& behavior = behaviors[b_name];
         double coll_cost = cost_collision(behavior, egocar, pred);
         double speed_cost = cost_speed(behavior, egocar);
 
@@ -95,6 +98,26 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
     }
 }
 
+vector<string> BehaviorPlanner::successor_behaviors(Behavior& b) 
+{
+
+    if(KeepLane.compare(b.name) == 0) {
+        return {KeepLane, SlowDown, SpeedUp, ChangeLaneRight, ChangeLaneLeft};
+    } else if (SlowDown.compare(b.name) == 0) {
+        return {KeepLane, SlowDown, ChangeLaneRight, ChangeLaneLeft};
+    } else if (SpeedUp.compare(b.name) == 0) {
+        return {KeepLane, SpeedUp, ChangeLaneRight, ChangeLaneLeft};
+    } else if (ChangeLaneRight.compare(b.name) == 0) {
+        return {KeepLane, SlowDown, SpeedUp, ChangeLaneRight};
+    } else if (ChangeLaneLeft.compare(b.name) == 0) {
+        return {KeepLane, SlowDown, SpeedUp, ChangeLaneRight};
+    } else {
+        return {KeepLane};
+    }
+
+}
+
+
 double BehaviorPlanner::cost_collision(Behavior& behavior, Vehicle& egocar, Prediction& pred)
 {
     // the higher collision probability, the higher the cost
@@ -102,7 +125,7 @@ double BehaviorPlanner::cost_collision(Behavior& behavior, Vehicle& egocar, Pred
     if (behavior.lane == 0) {
         double propoesed_speed = egocar.speed / 2.24 + behavior.accel * 0.224;
         if (pred.too_close) {
-                    
+            
         }
     } else if (behavior.lane == -1) {
         // collision_prob = pred.too_close       - (1 - pred.car_left) * pred.dist_front_left;

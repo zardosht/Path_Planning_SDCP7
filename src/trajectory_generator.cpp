@@ -27,7 +27,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
     double target_d = get_d(behavior, egocar);
 
     vel += behavior.accel * 0.224;  //mph
-    if (vel > MAX_SPEED) {  // convert v to mph for comparing
+    if (vel > MAX_SPEED) {  
         vel = MAX_SPEED;
     }
    

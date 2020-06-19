@@ -45,6 +45,7 @@ class BehaviorPlanner {
     
     private: 
         void update_costs(Prediction& pred, Vehicle& egocar);
+        vector<string> successor_behaviors(Behavior& behavior) ;
         double cost_speed(Behavior& behavior, Vehicle& egocar);
         double cost_collision(Behavior& behavior, Vehicle& egocar, Prediction& pred);
        
