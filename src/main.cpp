@@ -102,7 +102,7 @@ int main() {
           previous_path.end_d = end_path_d;
           
           Vehicle ego_car(EGOCAR_ID, car_x, car_y, car_s, car_d, car_yaw);
-          ego_car.speed = car_speed * 2.24; //mps
+          ego_car.speed = car_speed * MPH_TO_MS; // m/s
 
           pred.update(sensor_fusion, ego_car, previous_path);
           Behavior behavior = bp.next_behavior(ego_car, previous_path, pred);

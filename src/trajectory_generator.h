@@ -19,10 +19,17 @@ const int NUM_TRAJECTORY_POINTS = 50;
 // threshold to start planning a new trajectory; otherwise consume points from previous trajectory.
 const int PLAN_NEW_TRAJECTORY_THRESHOLD = 50;
 
+const double PATH_PLANNING_DURATION = 2.5; // sec.
+
 // the simulator reachs (consumes) each point of trajectory in TIMESTEP
 const double TIMESTEP = 0.02;
 
-const double MAX_SPEED = 48.5;  // mph
+const double MPH_TO_MS = 0.44704;
+
+const double MAX_SPEED = 48.5 * MPH_TO_MS;  // m/s
+
+const double MAX_ACC = 10;   // m/s^2
+
 
 struct Trajectory  
 {
@@ -53,20 +60,16 @@ class TrajectoryGenerator
         // variables
 
     private:
-
-        double get_d(Behavior behavior, Vehicle& egocar); 
-
+      
         void initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
 
-        void end_spline_points(Array2Xd& spline_knots, Vehicle& egocar, double start_from_s, double target_d);
+        void end_spline_points(Array2Xd& spline_knots, double t_s, double target_d);
 
         void transform_to_local(Array2Xd& spline_knots, const double ref_x, const double ref_y, const double ref_yaw);
 
         vector<double> transform_to_global(const double x_local, const double y_local, const double ref_x, const double ref_y, const double ref_yaw);
 
         Map& map;
-
-        double vel = 0.0;
 
 };
 

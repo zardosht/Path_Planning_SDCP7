@@ -4,62 +4,40 @@
 
 using std::cout;
 using std::endl;
+using std::min;
+using std::max;
 
+const double MAX_COST = 500;
 
 BehaviorPlanner::BehaviorPlanner()
 {
-    Behavior keep_lane;
-    keep_lane.name = KeepLane;
-    keep_lane.accel = 0;
-    keep_lane.lane = 0;
-    keep_lane.cost = LARGE_NUMBER;
-    behaviors[KeepLane] = keep_lane;
+    Behavior kl(0);
+    kl.name = KeepLane;
+    kl.cost = MAX_COST;
+    behaviors.push_back(kl);
 
-    Behavior speed_up;
-    speed_up.name = SpeedUp;
-    speed_up.accel = 1;
-    speed_up.lane = 0;
-    speed_up.cost = LARGE_NUMBER;
-    behaviors[SpeedUp] = speed_up;
+    Behavior cll(-1);
+    cll.name = ChangeLaneLeft;
+    cll.cost = MAX_COST;
+    behaviors.push_back(cll);
 
-    Behavior slow_down;
-    slow_down.name = SlowDown;
-    slow_down.accel = -1;
-    slow_down.lane = 0;
-    slow_down.cost = LARGE_NUMBER;
-    behaviors[SlowDown] = slow_down;
-
-    Behavior change_lane_left;
-    change_lane_left.name = ChangeLaneLeft;
-    change_lane_left.accel = 0;
-    change_lane_left.lane = -1;
-    change_lane_left.cost = LARGE_NUMBER;
-    behaviors[ChangeLaneLeft] = change_lane_left;
-
-    Behavior change_lane_right;
-    change_lane_right.name = ChangeLaneRight;
-    change_lane_right.accel = 0;
-    change_lane_right.lane = 1;
-    change_lane_right.cost = LARGE_NUMBER;
-    behaviors[ChangeLaneRight] = change_lane_right;
+    Behavior clr(1);
+    clr.name = ChangeLaneRight;
+    clr.cost = MAX_COST;
+    behaviors.push_back(clr);
 
 }
 
 BehaviorPlanner::~BehaviorPlanner() {}
-
-
-
 
 Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, Prediction& pred) 
 {
     int ego_lane = egocar.get_lane();
     update_costs(pred, egocar);
 
-    cout << "***** KeepLane.cost = " << behaviors[KeepLane].cost << endl;
-    cout << "***** SlowDown.cost = " << behaviors[SlowDown].cost << endl;
-    cout << "***** SpeedUp.cost = " << behaviors[SpeedUp].cost << endl;
-    cout << "***** ChangeLaneRight.cost = " << behaviors[ChangeLaneRight].cost << endl;
-    cout << "***** ChangeLaneLeft.cost = " << behaviors[ChangeLaneLeft].cost << endl;
+    cout << "***** KeepLane.cost = " << behaviors[0].cost << endl;
+    cout << "***** ChangeLaneRight.cost = " << behaviors[1].cost << endl;
+    cout << "***** ChangeLaneLeft.cost = " << behaviors[2].cost << endl;
     cout << "*********************************** best: " << best_behavior.name << endl;
 
     return best_behavior;
@@ -69,86 +47,79 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
 
 void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar) 
 {
-
-    double min_cost = LARGE_NUMBER;
-
-    if(egocar.speed == 0) {
-        best_behavior = behaviors[SpeedUp];
-        return;
-    }
-
-    // get behaviors that are allowed from this behavior
-    vector<string> next_bs = successor_behaviors(best_behavior);
-
-    double coll_cost_w = 1;
-    double speed_cost_w = 1;
-    for (string& b_name : next_bs)
+    double min_cost = 500;
+    for (Behavior& b : behaviors)
     {
-        Behavior& behavior = behaviors[b_name];
-        double coll_cost = cost_collision(behavior, egocar, pred);
-        double speed_cost = cost_speed(behavior, egocar);
-
-        //sigmoid
-        double cost = 1 / (1 + exp(-(speed_cost_w * speed_cost + coll_cost_w * coll_cost)));
-        behavior.cost = cost;
-        if (cost < min_cost) {
-            best_behavior = behavior;
-            min_cost = cost;
+        double cost_dist = distance_cost(b, egocar, pred);
+        double cost_v = speed_cost(b, egocar, pred);
+        b.cost = cost_v + cost_dist;
+        if (b.cost < min_cost) {
+            best_behavior = b;
+            min_cost = b.cost;
         }
     }
 }
 
-vector<string> BehaviorPlanner::successor_behaviors(Behavior& b) 
-{
 
-    if(KeepLane.compare(b.name) == 0) {
-        return {KeepLane, SlowDown, SpeedUp, ChangeLaneRight, ChangeLaneLeft};
-    } else if (SlowDown.compare(b.name) == 0) {
-        return {KeepLane, SlowDown, ChangeLaneRight, ChangeLaneLeft};
-    } else if (SpeedUp.compare(b.name) == 0) {
-        return {KeepLane, SpeedUp, ChangeLaneRight, ChangeLaneLeft};
-    } else if (ChangeLaneRight.compare(b.name) == 0) {
-        return {KeepLane, SlowDown, SpeedUp, ChangeLaneRight};
-    } else if (ChangeLaneLeft.compare(b.name) == 0) {
-        return {KeepLane, SlowDown, SpeedUp, ChangeLaneRight};
-    } else {
-        return {KeepLane};
+double BehaviorPlanner::distance_cost(Behavior& b, Vehicle& egocar, Prediction& pred)
+{
+    // favor the lane with the farthest free distance ahead
+    int tl = b.target_lane(egocar.get_lane());
+    Lane& lane = pred.lanes[tl];
+    double dist = lane.front_dist;
+    double cost_dist = 1 / dist;
+    if (lane.blocked) {
+        return 100 + cost_dist;
     }
+    return cost_dist;
 
 }
 
 
-double BehaviorPlanner::cost_collision(Behavior& behavior, Vehicle& egocar, Prediction& pred)
+double BehaviorPlanner::speed_cost(Behavior& b, Vehicle& egocar, Prediction& pred) 
 {
-    // the higher collision probability, the higher the cost
-    double collision_prob = 0.0;
-    if (behavior.lane == 0) {
-        double propoesed_speed = egocar.speed / 2.24 + behavior.accel * 0.224;
-        if (pred.too_close) {
-            
-        }
-    } else if (behavior.lane == -1) {
-        // collision_prob = pred.too_close       - (1 - pred.car_left) * pred.dist_front_left;
-        collision_prob = LARGE_NUMBER;
-    } else {
-        // collision_prob = pred.car_right * 1 / pred.dist_front_right - (1 - pred.car_right) * pred.dist_front_right;
-        collision_prob = LARGE_NUMBER;
+    // get v for the target_lane of behavior
+    int tl = b.target_lane(egocar.get_lane());
+    Lane& lane = pred.lanes[tl]; 
+    double v = lane.front_v;
+    b.target_v = v;
+    double cost_v = 1 - v / MAX_SPEED;
+    if (lane.blocked) {
+        return 100 + cost_v;
+    } 
+    return cost_v;
+    
+}
+
+Behavior::Behavior() { }
+
+Behavior::Behavior(int ls) : lane_shift(ls) {}
+
+
+Behavior::~Behavior() {}
+
+
+double Behavior::target_d(double current_lane) 
+{
+    // find current lane
+    int lane = target_lane(current_lane);
+    
+    // this should never happen!
+    if (lane < 0) {
+        cout << "ERROR: target_lane negative. Correcting to 0" << endl;
+        lane = 0;
     }
-
-     //sigmoid
-    double cost = 1 / (1 + exp(-collision_prob));
-    return cost;
+    if (lane > 2) {
+        // we only have three lanes 0, 1, 2
+        cout << "ERROR: target_lane larger than 2. Correcting to 2" << endl;
+        lane = 2;
+    }
+    
+    return 2.0 + 4.0 * lane;
 }
 
 
-double BehaviorPlanner::cost_speed(Behavior& behavior, Vehicle& egocar) 
+int Behavior::target_lane(int current_lane)  
 {
-    // the higher proposed_speed, the lower the cost    
-    double propoesed_speed = egocar.speed / 2.24 + behavior.accel * 0.224;
-    double cost = 1 / propoesed_speed;
-    //sigmoid
-    cost = 1 / (1 + exp(-cost));
-    return cost;
+    return current_lane + lane_shift;
 }
-
-
