@@ -26,7 +26,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
 
     double target_d = get_d(behavior, egocar);
 
-    vel += behavior.accel * 0.224;
+    vel += behavior.accel * 0.224;  //mph
     if (vel > MAX_SPEED) {  // convert v to mph for comparing
         vel = MAX_SPEED;
     }
@@ -87,7 +87,6 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
     double target_x = 30.0; //horizon
     double target_y = spl(target_x);
     double target_dist = sqrt(target_x * target_x + target_y * target_y);
-    // double vel = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
     double vel_mps = vel / 2.24;   // current speed in m/s
     double num_points = target_dist / (TIMESTEP * vel_mps);
 
@@ -154,12 +153,9 @@ void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, Vehicle& ego
     // end knot points for the spline
     // pick points in the far distance to
     // have a smooth spline
-    
-    //double factor = egocar.speed < 10? 1 : egocar.speed / MAX_SPEED;
-    double factor = 1.0;
-    vector<double> end_pt1 = map.get_xy(start_from_s + factor * 30, target_d);
-    vector<double> end_pt2 = map.get_xy(start_from_s + factor * 60, target_d);
-    vector<double> end_pt3 = map.get_xy(start_from_s + factor * 90, target_d);
+    vector<double> end_pt1 = map.get_xy(start_from_s + 30, target_d);
+    vector<double> end_pt2 = map.get_xy(start_from_s + 60, target_d);
+    vector<double> end_pt3 = map.get_xy(start_from_s + 90, target_d);
 
     //spline_knots already includes the two begining points
     spline_knots(0, 2) = end_pt1[0];

@@ -77,13 +77,14 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
         return;
     }
 
-    double coll_cost_w = 2;
+    double coll_cost_w = 1;
     double speed_cost_w = 1;
     for (auto &pair : behaviors)
     {
         Behavior& behavior = pair.second;
         double coll_cost = cost_collision(behavior, egocar, pred);
         double speed_cost = cost_speed(behavior, egocar);
+
         //sigmoid
         double cost = 1 / (1 + exp(-(speed_cost_w * speed_cost + coll_cost_w * coll_cost)));
         behavior.cost = cost;
@@ -99,21 +100,32 @@ double BehaviorPlanner::cost_collision(Behavior& behavior, Vehicle& egocar, Pred
     // the higher collision probability, the higher the cost
     double collision_prob = 0.0;
     if (behavior.lane == 0) {
-        collision_prob = pred.too_close * 1 / pred.dist_front;
+        double propoesed_speed = egocar.speed / 2.24 + behavior.accel * 0.224;
+        if (pred.too_close) {
+                    
+        }
     } else if (behavior.lane == -1) {
-        collision_prob = pred.car_left * 1 / pred.dist_front_left;
+        // collision_prob = pred.too_close       - (1 - pred.car_left) * pred.dist_front_left;
+        collision_prob = LARGE_NUMBER;
     } else {
-        collision_prob = pred.car_right * 1 / pred.dist_front_right;
+        // collision_prob = pred.car_right * 1 / pred.dist_front_right - (1 - pred.car_right) * pred.dist_front_right;
+        collision_prob = LARGE_NUMBER;
     }
 
+     //sigmoid
+    double cost = 1 / (1 + exp(-collision_prob));
+    return cost;
 }
 
 
 double BehaviorPlanner::cost_speed(Behavior& behavior, Vehicle& egocar) 
 {
     // the higher proposed_speed, the lower the cost    
-    double propoesed_speed = egocar.speed + behavior.accel * 0.224;
+    double propoesed_speed = egocar.speed / 2.24 + behavior.accel * 0.224;
     double cost = 1 / propoesed_speed;
+    //sigmoid
+    cost = 1 / (1 + exp(-cost));
+    return cost;
 }
 
 
