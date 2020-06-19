@@ -2,16 +2,13 @@
 #define TRAJECTORY_GENERATOR_H
 
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
 #include "behavior_planner.h"
 #include "vehicle.h"
 #include "map.h"
 
 
-
 using std::vector;
 
-using Eigen::Array2Xd;
 
 // how many point to calculate for a trajectory
 const int NUM_TRAJECTORY_POINTS = 50;
@@ -21,8 +18,9 @@ const int PLAN_NEW_TRAJECTORY_THRESHOLD = 50;
 
 const double PATH_PLANNING_DURATION = 2.5; // sec.
 
-// the simulator reachs (consumes) each point of trajectory in TIMESTEP
-const double TIMESTEP = 0.02;
+// the simulator reachs (consumes) each point of trajectory 
+// in 0.02 seconds (in other words 50 points per second)
+const double TIMESTEP = 0.02;   // sec.  
 
 const double MPH_TO_MS = 0.44704;
 
@@ -60,12 +58,14 @@ class TrajectoryGenerator
         // variables
 
     private:
-      
-        void initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
 
-        void end_spline_points(Array2Xd& spline_knots, double t_s, double target_d);
+        double target_s(double ego_s, double ego_v, double target_v, double palnning_time = PATH_PLANNING_DURATION);
 
-        void transform_to_local(Array2Xd& spline_knots, const double ref_x, const double ref_y, const double ref_yaw);
+        void initial_spline_points(vector<double>& knot_xs, vector<double>& knot_ys, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
+
+        void end_spline_points(vector<double>& knot_xs, vector<double>& knot_ys, double t_s, double target_v, double target_d);
+
+        void transform_to_local(vector<double>& knot_xs, vector<double>& knot_ys, const double ref_x, const double ref_y, const double ref_yaw);
 
         vector<double> transform_to_global(const double x_local, const double y_local, const double ref_x, const double ref_y, const double ref_yaw);
 
