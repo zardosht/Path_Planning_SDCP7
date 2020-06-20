@@ -91,8 +91,8 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
         ego_v = min(ego_v - MAX_ACC * TIMESTEP, MAX_SPEED);
     }
     cout << "*** ego_v=" << ego_v << endl;
-    // double target_x = 30.0; //horizon
-    double target_x = 100.0; //horizon
+    
+    double target_x = PLANNING_DISTANCE_X; //horizon
     double target_y = spl(target_x);
     double target_dist = sqrt(target_x * target_x + target_y * target_y);
     double num_points = target_dist / (TIMESTEP * ego_v);

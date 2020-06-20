@@ -32,10 +32,18 @@ BehaviorPlanner::~BehaviorPlanner() {}
 
 Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, Prediction& pred) 
 {
+
+    if (egocar.speed < 10) {
+        Behavior& kl = behaviors[0];  // keep lane
+        kl.target_v = 20;   // m/s
+        best_behavior = kl;
+        return best_behavior;
+    }
+
     int ego_lane = egocar.get_lane();
     update_costs(pred, egocar);
 
-    cout << "***** KeepLane.cost = " << behaviors[0].cost << endl;
+    cout << "\n***** KeepLane.cost = " << behaviors[0].cost << endl;
     cout << "***** ChangeLaneRight.cost = " << behaviors[1].cost << endl;
     cout << "***** ChangeLaneLeft.cost = " << behaviors[2].cost << endl;
     cout << "*********************************** best: " << best_behavior.name << endl;

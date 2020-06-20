@@ -12,24 +12,21 @@
 using std::vector;
 
 // how many point to calculate for a trajectory
-// const int NUM_TRAJECTORY_POINTS = 50;
 const int NUM_TRAJECTORY_POINTS = 100;
 
 // threshold to start planning a new trajectory; otherwise consume points from previous trajectory.
-// const int PLAN_NEW_TRAJECTORY_THRESHOLD = 50;
 const int PLAN_NEW_TRAJECTORY_THRESHOLD = 100;
+
+const double PLANNING_DISTANCE_X = 100.0;  
 
 // the simulator reachs (consumes) each point of trajectory 
 // in 0.02 seconds (in other words 50 points per second)
 const double TIMESTEP = 0.02;   // sec.  
 
-const double PATH_PLANNING_DURATION = NUM_TRAJECTORY_POINTS * TIMESTEP; // sec.
-
 const double MPH_TO_MS = 0.44704;
 
 const double MAX_SPEED = 48.5 * MPH_TO_MS;  // m/s
 
-//const double MAX_ACC = 10;   // m/s^2
 const double MAX_ACC = 7;   // m/s^2
 
 
