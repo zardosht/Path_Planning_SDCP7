@@ -40,7 +40,8 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
         return best_behavior;
     }
 
-    cout << "\n" << pred;
+    cout << "\nego_lane = " << egocar.get_lane() << endl;
+    cout << pred;
 
     int ego_lane = egocar.get_lane();
     update_costs(pred, egocar);
