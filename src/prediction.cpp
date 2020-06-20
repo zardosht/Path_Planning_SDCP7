@@ -50,11 +50,6 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
   
         // distance from ego car to the car in front of us
         double dist = car.s - ego_s;
-
-        if (dist < 0) {
-            cout << "Negative dist: " << dist << ", car_lane: " << car_lane << ", ego_lane: " << ego_lane << endl;
-        }
-
         Lane& lane = lanes[car_lane];
 
         if (lane.id == ego_lane) {
@@ -72,12 +67,6 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
             if (dist < TOO_CLOSE_GAP) {
                 lane.front_v = min(lane.front_v, car_speed);
             } else {
-                // set the speed relative to distance 
-                // if the car is far away from us 
-
-                // double factor = TOO_CLOSE_GAP / dist;
-                // lane.front_v = min(lane.front_v, MAX_SPEED - factor * (MAX_SPEED - car_speed));
-
                 lane.front_v = min(lane.front_v, MAX_SPEED);
             }
         }
@@ -89,7 +78,7 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
         all_bloked &= lanes[i].blocked;
     }
     all_lanes_blocked = all_bloked;
-    
+
 }
 
 void Prediction::init_lanes() 
@@ -128,5 +117,6 @@ std::ostream& operator<<(std::ostream &strm, const Prediction &pred) {
                         << ", front_dist=" << lane.front_dist 
                         << ", front_v=" << lane.front_v << endl;
     }
+    strm << "---- ALL_BLOCKED=" << pred.all_lanes_blocked << endl;
     return strm;
 }

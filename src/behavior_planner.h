@@ -56,6 +56,7 @@ class BehaviorPlanner {
         void update_costs(Prediction& pred, Vehicle& egocar);
         double speed_cost(Behavior& behavior, Vehicle& egocar, Prediction& pred);
         double distance_cost(Behavior& behavior, Vehicle& egocar, Prediction& pred);
+        double lane_change_cost(Behavior& b, Vehicle& egocar, Prediction& pred);
        
 }; 
 

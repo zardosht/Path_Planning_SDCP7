@@ -63,7 +63,8 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
 
         double cost_dist = distance_cost(b, egocar, pred);
         double cost_v = speed_cost(b, egocar, pred);
-        b.cost = cost_v + cost_dist;
+        double cost_lane_change = lane_change_cost(b, egocar, pred);
+        b.cost = cost_v + cost_dist + cost_lane_change;
         if (b.cost < min_cost) {
             best_behavior = b;
             min_cost = b.cost;
@@ -76,6 +77,23 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
         // kl.target_v is already set in speed_cost()
         kl.cost = 0;
         best_behavior = kl;
+    }
+}
+
+
+double BehaviorPlanner::lane_change_cost(Behavior& b, Vehicle& egocar, Prediction& pred) 
+{
+    if (b.name.compare(KeepLane) == 0) 
+    {
+        return 0.0;
+    }
+
+    int tl = b.target_lane(egocar.get_lane());
+    Lane& lane = pred.lanes[tl];
+    if (lane.blocked) {
+        return 100;
+    } else {
+        return 0;
     }
 }
 
