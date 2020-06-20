@@ -2,13 +2,16 @@
 #define TRAJECTORY_GENERATOR_H
 
 #include <vector>
+#include "Eigen-3.3/Eigen/Core"
 #include "behavior_planner.h"
 #include "vehicle.h"
 #include "map.h"
 
 
+
 using std::vector;
 
+using Eigen::Array2Xd;
 
 // how many point to calculate for a trajectory
 const int NUM_TRAJECTORY_POINTS = 50;
@@ -30,6 +33,9 @@ const double MAX_SPEED = 48.5 * MPH_TO_MS;  // m/s
 const double MAX_ACC = 7;   // m/s^2
 
 
+
+struct Behavior;
+
 struct Trajectory  
 {
     vector<double> xs;
@@ -42,8 +48,6 @@ struct Trajectory
 
 };
 
-struct Behavior;
-
 class TrajectoryGenerator 
 {
     public:
@@ -54,19 +58,18 @@ class TrajectoryGenerator
         ~TrajectoryGenerator();
 
         // functions
-        Trajectory generate_trajectory(Behavior behavior, Vehicle& vehicle, Trajectory& previous_path);
+        Trajectory generate_trajectory(Behavior& behavior, Vehicle& egocar, Trajectory& previous_path);
 
         // variables
 
     private:
 
-        double target_s(double ego_s, double ego_v, double target_v, double palnning_time = PATH_PLANNING_DURATION);
 
-        void initial_spline_points(vector<double>& knot_xs, vector<double>& knot_ys, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
+        void initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
 
-        void end_spline_points(vector<double>& knot_xs, vector<double>& knot_ys, double t_s, double target_v, double target_d);
+        void end_spline_points(Array2Xd& spline_knots, double start_from_s, double target_d);
 
-        void transform_to_local(vector<double>& knot_xs, vector<double>& knot_ys, const double ref_x, const double ref_y, const double ref_yaw);
+        void transform_to_local(Array2Xd& spline_knots, const double ref_x, const double ref_y, const double ref_yaw);
 
         vector<double> transform_to_global(const double x_local, const double y_local, const double ref_x, const double ref_y, const double ref_yaw);
 
