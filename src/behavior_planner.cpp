@@ -55,7 +55,7 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
 
 void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar) 
 {
-    double min_cost = 500;
+    double min_cost = MAX_COST;
     for (Behavior& b : behaviors)
     {
         double cost_dist = distance_cost(b, egocar, pred);

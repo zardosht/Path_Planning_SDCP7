@@ -46,24 +46,34 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
         //  points in previous_path)
         int car_lane = car.get_lane();
         double car_speed = sqrt(car.vx*car.vx + car.vy*car.vy);  // m/s
-        car.s += (double)prev_path_size * 0.02 * car_speed; 
+        car.s += (double)prev_path_size * TIMESTEP * car_speed; 
   
         // distance from ego car to the car in front of us
         double dist = car.s - ego_s;
         Lane& lane = lanes[car_lane];
-        if(fabs(dist) < TOO_CLOSE_GAP) {
-            lane.blocked = true;
+
+        if (lane.id = ego_lane) {
+            if(dist >= 0 && dist < TOO_CLOSE_GAP) {
+                lane.blocked = true;
+            }
+        } else {
+            if (LANE_CHANGE_GAP_REAR < dist && dist < LANE_CHANGE_GAP_FRONT) {
+                lane.blocked = true;
+            }
         }
         
         if(dist >= 0) {
             lane.front_dist = min(lane.front_dist, dist);
-            if (dist < TOO_CLOSE_GAP) {
+            if (dist < 2 * TOO_CLOSE_GAP) {
                 lane.front_v = min(lane.front_v, car_speed);
             } else {
                 // set the speed relative to distance 
                 // if the car is far away from us 
-                double factor = TOO_CLOSE_GAP / dist;
-                lane.front_v = min(lane.front_v, MAX_SPEED - factor * (MAX_SPEED - car_speed));
+
+                // double factor = TOO_CLOSE_GAP / dist;
+                // lane.front_v = min(lane.front_v, MAX_SPEED - factor * (MAX_SPEED - car_speed));
+
+                lane.front_v = MAX_SPEED;
             }
         }
       

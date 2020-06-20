@@ -17,7 +17,7 @@ const double LANE_CHANGE_GAP_REAR = -7;   // m
 
 const int NUM_LANES = 3;
 
-const double PREDICTION_HIROZON = 200; // m
+const double PREDICTION_HIROZON = 120; // m
 
 
 struct Lane 
