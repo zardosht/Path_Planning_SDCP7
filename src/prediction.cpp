@@ -104,3 +104,16 @@ void Prediction::reset_lanes()
     }
 }
 
+
+
+std::ostream& operator<<(std::ostream &strm, const Prediction &pred) {
+    for (int i = 0; i < NUM_LANES; i++) 
+    {
+        const Lane& lane = pred.lanes[i];
+        strm << "Lane " << i 
+                        << ": blocked=" << lane.blocked 
+                        << ", front_dist=" << lane.front_dist 
+                        << ", front_v=" << lane.front_v << endl;
+    }
+    return strm;
+}

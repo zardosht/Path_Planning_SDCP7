@@ -38,6 +38,8 @@ struct Prediction
         vector<Lane> lanes;
         void update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, Trajectory& prev_path);
 
+        friend std::ostream& operator<<(std::ostream &strm, const Prediction &pred);
+
     private: 
         void init_lanes();
         void reset_lanes();
