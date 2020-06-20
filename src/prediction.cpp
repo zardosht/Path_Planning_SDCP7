@@ -83,6 +83,13 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
         }
       
     }
+
+    bool all_bloked = true;
+    for (int i = 0; i < NUM_LANES; i++) {
+        all_bloked &= lanes[i].blocked;
+    }
+    all_lanes_blocked = all_bloked;
+    
 }
 
 void Prediction::init_lanes() 
@@ -101,6 +108,7 @@ void Prediction::init_lanes()
 
 void Prediction::reset_lanes() 
 {
+    all_lanes_blocked = false;
     for (int i = 0; i < NUM_LANES; i++) 
     {
         lanes[i].blocked = false;

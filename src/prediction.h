@@ -12,8 +12,8 @@ using std::vector;
 struct Trajectory;
 
 const double TOO_CLOSE_GAP = 30; // m
-const double LANE_CHANGE_GAP_FRONT = 30;  // m
-const double LANE_CHANGE_GAP_REAR = -10;   // m
+const double LANE_CHANGE_GAP_FRONT = 50;  // m
+const double LANE_CHANGE_GAP_REAR = -20;   // m
 
 const int NUM_LANES = 3;
 
@@ -39,6 +39,8 @@ struct Prediction
         void update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, Trajectory& prev_path);
 
         friend std::ostream& operator<<(std::ostream &strm, const Prediction &pred);
+
+        bool all_lanes_blocked;
 
     private: 
         void init_lanes();

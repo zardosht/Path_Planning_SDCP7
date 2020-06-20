@@ -46,8 +46,8 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
     update_costs(pred, egocar);
 
     cout << "***** KeepLane.cost = " << behaviors[0].cost << endl;
-    cout << "***** ChangeLaneRight.cost = " << behaviors[1].cost << endl;
-    cout << "***** ChangeLaneLeft.cost = " << behaviors[2].cost << endl;
+    cout << "***** ChangeLaneLeft.cost = " << behaviors[1].cost << endl;
+    cout << "***** ChangeLaneRight.cost = " << behaviors[2].cost << endl;
     cout << "*********************************** best: " << best_behavior.name << endl;
 
     return best_behavior;
@@ -60,6 +60,7 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
     double min_cost = MAX_COST;
     for (Behavior& b : behaviors)
     {
+
         double cost_dist = distance_cost(b, egocar, pred);
         double cost_v = speed_cost(b, egocar, pred);
         b.cost = cost_v + cost_dist;
@@ -67,6 +68,14 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
             best_behavior = b;
             min_cost = b.cost;
         }
+    }
+
+    if (pred.all_lanes_blocked) 
+    {
+        Behavior& kl = behaviors[0];  // keep lane
+        // kl.target_v is already set in speed_cost()
+        kl.cost = 0;
+        best_behavior = kl;
     }
 }
 
