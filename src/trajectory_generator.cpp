@@ -27,7 +27,9 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
 
     int ego_lane = egocar.get_lane();
     double target_d = behavior.target_d(ego_lane);
+    cout << "*** target_d=" << target_d << endl;
     double target_v = behavior.target_v;
+    cout << "*** target_v=" << target_v << endl;
 
 
     // get initial spline knots
@@ -79,7 +81,8 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
     // by the (speed * time_step). 
 
 
-    double ego_v = (egocar.speed == 0)? 5 : egocar.speed;
+    //double ego_v = (egocar.speed == 0)? 5 : egocar.speed;
+    cout << "*** egocar.speed=" << egocar.speed << endl;
     if (target_v > ego_v) {
         //accelerate
         ego_v = min(ego_v + MAX_ACC * TIMESTEP, MAX_SPEED);
@@ -87,11 +90,11 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
         //decelerate
         ego_v = min(ego_v - MAX_ACC * TIMESTEP, MAX_SPEED);
     }
-    double target_x = 30.0; //horizon
+    cout << "*** ego_v=" << ego_v << endl;
+    // double target_x = 30.0; //horizon
+    double target_x = 100.0; //horizon
     double target_y = spl(target_x);
     double target_dist = sqrt(target_x * target_x + target_y * target_y);
-    // double vel = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
-    //double vel_mps = vel / 2.24;   // current speed in m/s
     double num_points = target_dist / (TIMESTEP * ego_v);
 
     double x_add_on = 0.0;
