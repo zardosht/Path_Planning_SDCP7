@@ -50,9 +50,14 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
   
         // distance from ego car to the car in front of us
         double dist = car.s - ego_s;
+
+        if (dist < 0) {
+            cout << "Negative dist: " << dist << ", car_lane: " << car_lane << ", ego_lane: " << ego_lane << endl;
+        }
+
         Lane& lane = lanes[car_lane];
 
-        if (lane.id = ego_lane) {
+        if (lane.id == ego_lane) {
             if(dist >= 0 && dist < TOO_CLOSE_GAP) {
                 lane.blocked = true;
             }
