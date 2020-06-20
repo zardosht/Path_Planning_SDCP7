@@ -68,44 +68,40 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
     // Note that contrary to the solution presented in the Q&A video, 
     // we do not distribute trajectory points evenly, but based on planning distance.
     // Instead the points are smapled from spline based on planning duration
-    
-
-    // void sample_spline_xy(double start_x, double start_y, double ego_v, double target_v
-
-
-    vector<double> xs;
-    vector<double> ys;
-	
+  
     double x0 = knot_xs[0];
-	double y0 = spl(ref_x);
+	double y0 = knot_ys[0];
     vector<double> xy_global = transform_to_global(x0, y0, ref_x, ref_y, ref_yaw);
     trajectory.xs.push_back(xy_global[0]);
-    trajectory.ys.push_back(xy_global[0]);
+    trajectory.ys.push_back(xy_global[1]);
     
     double x1 = knot_xs[1];
     double y1 = knot_ys[1];
     xy_global = transform_to_global(x1, y1, ref_x, ref_y, ref_yaw);
     trajectory.xs.push_back(xy_global[0]);
-    trajectory.ys.push_back(xy_global[0]);
+    trajectory.ys.push_back(xy_global[1]);
 
-    double theta = 0; 
     double next_dist;
-    double ego_v = egocar.vx;
-	double next_dist_x;
-	for (int dt = 1; dt * TIMESTEP <= PATH_PLANNING_DURATION; dt++) {
+    double ego_v = egocar.speed;
+	for (int dt = 1; dt * TIMESTEP <= PATH_PLANNING_DURATION - (prev_path_size * TIMESTEP); dt++) {
         x0 = x1;
 	    y0 = y1;
-    	next_dist = target_s(0, ego_v, target_v, TIMESTEP);
-        next_dist_x = next_dist * cos(theta); 
-        x1 = x0 + next_dist_x;
+    	next_dist = TIMESTEP * ego_v;
+        x1 = x0 + next_dist;
         y1 = spl(x1);
         
         xy_global = transform_to_global(x1, y1, ref_x, ref_y, ref_yaw);
         trajectory.xs.push_back(xy_global[0]);
-        trajectory.ys.push_back(xy_global[0]);
+        trajectory.ys.push_back(xy_global[1]);
+
+        if (target_v > ego_v) {
+            //accelerate
+            ego_v = min(ego_v + MAX_ACC * TIMESTEP, MAX_SPEED);
+        } else {
+            //decelerate
+            ego_v = min(ego_v - MAX_ACC * TIMESTEP, MAX_SPEED);
+        }
         
-        theta = atan2(y1 - y0, x1 - x0);
-        ego_v = distance(x0, y0, x1, y1) / TIMESTEP;
 	}
 
     
@@ -174,10 +170,10 @@ void TrajectoryGenerator::initial_spline_points(vector<double>& knot_xs, vector<
 }
 
 
-double TrajectoryGenerator::target_s(double start_s, double start_v, double target_v, double palnning_time = PATH_PLANNING_DURATION) {
+double TrajectoryGenerator::target_s(double start_s, double start_v, double target_v, double palnning_time) {
 	start_v = min(start_v, MAX_SPEED);
 	if (fabs(start_v / target_v - 1) < 0.05) {
-		// ego_v is almost near target_v
+		// start_v is almost near target_v
 		return start_s + target_v * palnning_time;
 	}
 
@@ -202,11 +198,16 @@ void TrajectoryGenerator::end_spline_points(vector<double>& knot_xs, vector<doub
     // the last point of spline is target_s
     // the two points before that are 5 and 10 trajectory points behind (num_points_behid)
     // with their distance from target_s given by target_v * TIMESTEP * num_points_behind 
+
     vector<double> end_pt1 = map.get_xy(t_s - target_v * TIMESTEP * 10, target_d);
     vector<double> end_pt2 = map.get_xy(t_s - target_v * TIMESTEP * 5, target_d);
     vector<double> end_pt3 = map.get_xy(t_s, target_d);
 
-    //spline_knots already includes the two begining points
+    // vector<double> end_pt1 = map.get_xy(t_s, target_d);
+    // vector<double> end_pt2 = map.get_xy(t_s + 30, target_d);
+    // vector<double> end_pt3 = map.get_xy(t_s + 60, target_d);
+
+
     knot_xs.push_back(end_pt1[0]);
     knot_xs.push_back(end_pt2[0]);
     knot_xs.push_back(end_pt3[0]);
@@ -229,8 +230,8 @@ void TrajectoryGenerator::transform_to_local(vector<double>& knot_xs, vector<dou
         double shift_x = knot_xs[i] - ref_x;
         double shift_y = knot_ys[i] - ref_y;
 
-        knot_xs[i] = (shift_x * cos(0 - ref_yaw) - shift_y * sin(0 - ref_yaw));
-        knot_ys[i] = (shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw));
+        knot_xs[i] = (shift_x * cos(-ref_yaw) - shift_y * sin(-ref_yaw));
+        knot_ys[i] = (shift_x * sin(ref_yaw) + shift_y * cos(-ref_yaw));
     }
     
 }
