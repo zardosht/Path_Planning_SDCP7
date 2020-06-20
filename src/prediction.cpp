@@ -64,7 +64,7 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
         
         if(dist >= 0) {
             lane.front_dist = min(lane.front_dist, dist);
-            if (dist < 2 * TOO_CLOSE_GAP) {
+            if (dist < TOO_CLOSE_GAP) {
                 lane.front_v = min(lane.front_v, car_speed);
             } else {
                 // set the speed relative to distance 
