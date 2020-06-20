@@ -23,6 +23,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
     // find out the acceleration from behavior value (ACCEL, ZERO, DECEL)
     
     int prev_path_size = previous_path.size();
+    cout << "*** prev_path_size=" << prev_path_size << endl;
     if (prev_path_size >= PLAN_NEW_TRAJECTORY_THRESHOLD) 
         return previous_path;
 
@@ -71,94 +72,96 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior behavior, Vehicle& 
     // we do not distribute trajectory points evenly, but based on planning distance.
     // Instead the points are smapled from spline based on planning duration
   
-    double x0 = knot_xs[0];
-	double y0 = knot_ys[0];
-    vector<double> xy_global = transform_to_global(x0, y0, ref_x, ref_y, ref_yaw);
-    trajectory.xs.push_back(xy_global[0]);
-    trajectory.ys.push_back(xy_global[1]);
+    // double x0 = knot_xs[0];
+	// double y0 = knot_ys[0];
+    // vector<double> xy_global = transform_to_global(x0, y0, ref_x, ref_y, ref_yaw);
+    // trajectory.xs.push_back(xy_global[0]);
+    // trajectory.ys.push_back(xy_global[1]);
     
-    double x1 = knot_xs[1];
-    double y1 = knot_ys[1];
-    xy_global = transform_to_global(x1, y1, ref_x, ref_y, ref_yaw);
-    trajectory.xs.push_back(xy_global[0]);
-    trajectory.ys.push_back(xy_global[1]);
+    // double x1 = knot_xs[1];
+    // double y1 = knot_ys[1];
+    // xy_global = transform_to_global(x1, y1, ref_x, ref_y, ref_yaw);
+    // trajectory.xs.push_back(xy_global[0]);
+    // trajectory.ys.push_back(xy_global[1]);
 
-    double next_dist;
-    double ego_v = egocar.speed;
-	for (int dt = 1; dt * TIMESTEP <= PATH_PLANNING_DURATION - (prev_path_size * TIMESTEP); dt++) {
-        x0 = x1;
-	    y0 = y1;
-    	next_dist = TIMESTEP * ego_v;
-        x1 = x0 + next_dist;
-        y1 = spl(x1);
+    // double next_dist;
+    // double ego_v = egocar.speed;
+	// for (int dt = 1; dt * TIMESTEP <= PATH_PLANNING_DURATION - (prev_path_size * TIMESTEP); dt++) {
+    //     x0 = x1;
+	//     y0 = y1;
+    // 	next_dist = TIMESTEP * ego_v;
+    //     x1 = x0 + next_dist;
+    //     y1 = spl(x1);
         
-        xy_global = transform_to_global(x1, y1, ref_x, ref_y, ref_yaw);
-        trajectory.xs.push_back(xy_global[0]);
-        trajectory.ys.push_back(xy_global[1]);
-
-        if (target_v > ego_v) {
-            //accelerate
-            ego_v = min(ego_v + MAX_ACC * TIMESTEP, MAX_SPEED);
-        } else {
-            //decelerate
-            ego_v = min(ego_v - MAX_ACC * TIMESTEP, MAX_SPEED);
-        }
-        
-	}
-
-    
-
-    // // add points from previus path to the beginning of the current path
-    // Trajectory trajectory;
-    // for(int i = 0; i < prev_path_size; ++i)
-    // {
-    //     trajectory.xs.push_back(previous_path.xs[i]);
-    //     trajectory.ys.push_back(previous_path.ys[i]);
-    // }
-    // // add the rest points to trajectory (get the xs by 
-    // // considering the speed and acceleration, get the ys from 
-    // // spline, transform back the x and y into global coordinates
-    // // add the x and y to trajectory)
-
-    // // Define how far to go in the x direction.
-    // // We uniformly divide this distance into N points.
-    // // That gives us the x coordinates of the path points. 
-    // // The y coordinates are calculated by the spline. 
-    // // The time step of the simulator is 0.02. That is the 
-    // // simulator reachs each point in the path in 0.02 
-    // // seconds. The velocity (ref_vel) hence defines how 
-    // // dense the points are. Higher velocity means the points
-    // // are far apart. Lower velocity means the points are 
-    // // dence near eachother.   
-    // // The number of points N is then given by deviding the distance 
-    // // by the (speed * time_step). 
-
-    // double target_x = 30.0; //horizon
-    // double target_y = spl(target_x);
-    // double target_dist = sqrt(target_x * target_x + target_y * target_y);
-    // // double vel = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
-    // double vel_mps = vel / 2.24;   // current speed in m/s
-    // double num_points = target_dist / (TIMESTEP * vel_mps);
-
-    // double x_add_on = 0.0;
-    // for(int i = 1; i <= NUM_TRAJECTORY_POINTS - prev_path_size; i++) 
-    // { 
-    //     double x = x_add_on + target_x / num_points;
-    //     double y = spl(x);
-    //     x_add_on = x;
-
-    //     // convert to global coordinates
-    //     vector<double> xy_global = transform_to_global(x, y, ref_x, ref_y, ref_yaw);
-       
+    //     xy_global = transform_to_global(x1, y1, ref_x, ref_y, ref_yaw);
     //     trajectory.xs.push_back(xy_global[0]);
     //     trajectory.ys.push_back(xy_global[1]);
-    
-    // }
 
+    //     if (target_v > ego_v) {
+    //         //accelerate
+    //         ego_v = min(ego_v + MAX_ACC * TIMESTEP, MAX_SPEED);
+    //     } else {
+    //         //decelerate
+    //         ego_v = min(ego_v - MAX_ACC * TIMESTEP, MAX_SPEED);
+    //     }
+        
+	// }
+    
     // return trajectory;
+    
+
+    
+    // add the rest points to trajectory (get the xs by 
+    // considering the speed and acceleration, get the ys from 
+    // spline, transform back the x and y into global coordinates
+    // add the x and y to trajectory)
+
+    // Define how far to go in the x direction.
+    // We uniformly divide this distance into N points.
+    // That gives us the x coordinates of the path points. 
+    // The y coordinates are calculated by the spline. 
+    // The time step of the simulator is 0.02. That is the 
+    // simulator reachs each point in the path in 0.02 
+    // seconds. The velocity (ref_vel) hence defines how 
+    // dense the points are. Higher velocity means the points
+    // are far apart. Lower velocity means the points are 
+    // dence near eachother.   
+    // The number of points N is then given by deviding the distance 
+    // by the (speed * time_step). 
+
+    double ego_v = (egocar.speed == 0)? 5 : egocar.speed;
+    if (target_v > ego_v) {
+        //accelerate
+        ego_v = min(ego_v + MAX_ACC * TIMESTEP, MAX_SPEED);
+    } else {
+        //decelerate
+        ego_v = min(ego_v - MAX_ACC * TIMESTEP, MAX_SPEED);
+    }
+
+    // double target_x = 30.0; //horizon
+    double target_x = 100.0; //horizon
+    double target_y = spl(target_x);
+    double target_dist = sqrt(target_x * target_x + target_y * target_y);
+    // double vel = (egocar.speed > 0.0)? egocar.speed : 0.224;  // current speed in mph
+    // double vel_mps = vel / 2.24;   // current speed in m/s
+    double num_points = target_dist / (TIMESTEP * ego_v);
+
+    double x_add_on = 0.0;
+    for(int i = 1; i <= NUM_TRAJECTORY_POINTS - prev_path_size; i++) 
+    { 
+        double x = x_add_on + target_x / num_points;
+        double y = spl(x);
+        x_add_on = x;
+
+        // convert to global coordinates
+        vector<double> xy_global = transform_to_global(x, y, ref_x, ref_y, ref_yaw);
+       
+        trajectory.xs.push_back(xy_global[0]);
+        trajectory.ys.push_back(xy_global[1]);
+    
+    }
 
     return trajectory;
-
 
 }
 
@@ -201,26 +204,26 @@ void TrajectoryGenerator::initial_spline_points(vector<double>& knot_xs, vector<
 }
 
 
-double TrajectoryGenerator::target_s(double start_s, double start_v, double target_v, double palnning_time) {
-	start_v = min(start_v, MAX_SPEED);
-	if (fabs(start_v / target_v - 1) < 0.05) {
-		// start_v is almost near target_v
-		return start_s + target_v * palnning_time;
-	}
+// double TrajectoryGenerator::target_s(double start_s, double start_v, double target_v, double palnning_time) {
+// 	start_v = min(start_v, MAX_SPEED);
+// 	if (fabs(start_v / target_v - 1) < 0.05) {
+// 		// start_v is almost near target_v
+// 		return start_s + target_v * palnning_time;
+// 	}
 
-    // shortest time to ge to target velocity
-	double acc_t = min(fabs(target_v - start_v)/MAX_ACC, palnning_time); 
-	// considers both distance traveled during reaching of target v (with max acceleration)
-	// and distance traveled with target v.
-	double dist_target_v = (palnning_time - acc_t) * target_v;
-	if (target_v > start_v){
-        // accelerate
-		return start_s + acc_t * start_v + 0.5 * pow(acc_t,2) * MAX_ACC + dist_target_v;
-	} else{
-        // decelerate
-		return start_s + acc_t * start_v - 0.5 * pow(acc_t,2) * MAX_ACC + dist_target_v; 
-	}
-}
+//     // shortest time to ge to target velocity
+// 	double acc_t = min(fabs(target_v - start_v)/MAX_ACC, palnning_time); 
+// 	// considers both distance traveled during reaching of target v (with max acceleration)
+// 	// and distance traveled with target v.
+// 	double dist_target_v = (palnning_time - acc_t) * target_v;
+// 	if (target_v > start_v){
+//         // accelerate
+// 		return start_s + acc_t * start_v + 0.5 * pow(acc_t,2) * MAX_ACC + dist_target_v;
+// 	} else{
+//         // decelerate
+// 		return start_s + acc_t * start_v - 0.5 * pow(acc_t,2) * MAX_ACC + dist_target_v; 
+// 	}
+// }
 
 
 void TrajectoryGenerator::end_spline_points(vector<double>& knot_xs, vector<double>& knot_ys, double t_s, double target_v, double target_d)
