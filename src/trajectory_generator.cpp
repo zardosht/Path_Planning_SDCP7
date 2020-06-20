@@ -34,28 +34,23 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
     // get initial yaw (for transforming the points
     // into local coordinates and back to global coordinates)
     // get end spline knots
-    Array2Xd spline_knots(2, 5);
+    vector<double> knot_xs;
+    vector<double> knot_ys;
     double ref_yaw = deg2rad(egocar.yaw);  //inout
-    initial_spline_points(spline_knots, egocar, previous_path, ref_yaw);
+    initial_spline_points(knot_xs, knot_ys, egocar, previous_path, ref_yaw);
 
-    double ref_x = spline_knots(0, 1);
-    double ref_y = spline_knots(1, 1);
+    double ref_x = knot_xs[1];
+    double ref_y = knot_ys[1];
 
     double start_from_s = (prev_path_size > 0)? previous_path.end_s : egocar.s;
-    end_spline_points(spline_knots, start_from_s, target_d);
+    end_spline_points(knot_xs, knot_ys, start_from_s, target_v, target_d);
 
     // transform spline knots into local coordinates
-    transform_to_local(spline_knots, ref_x, ref_y, ref_yaw);
+    transform_to_local(knot_xs, knot_ys, ref_x, ref_y, ref_yaw);
 
     // prepare spline
+   // prepare spline
     tk::spline spl;
-    vector<double> knot_xs(spline_knots.cols());
-    vector<double> knot_ys(spline_knots.cols());
-    for (int i = 0; i < spline_knots.cols(); ++i) 
-    {
-        knot_xs[i] = spline_knots(0, i);
-        knot_ys[i] = spline_knots(1, i);
-    }
     spl.set_points(knot_xs, knot_ys);
 
     // add points from previus path to the beginning of the current path
@@ -124,7 +119,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
 // trajectory.
 // Also returns a ref_yaw for transforming points into local
 // coordinate system.
-void TrajectoryGenerator::initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw) 
+void TrajectoryGenerator::initial_spline_points(vector<double>& knot_xs, vector<double>& knot_ys, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw) 
 {
     int prev_path_size = prev_path.size();
     if(prev_path_size < 2) 
@@ -132,10 +127,10 @@ void TrajectoryGenerator::initial_spline_points(Array2Xd& spline_knots, Vehicle&
         double prelast_x = egocar.x - cos(deg2rad(egocar.yaw));
         double prelast_y = egocar.y - sin(deg2rad(egocar.yaw));
 
-        spline_knots(0, 0) = prelast_x;
-        spline_knots(0, 1) = egocar.x;
-        spline_knots(1, 0) = prelast_y;
-        spline_knots(1, 1) = egocar.y;
+        knot_xs.push_back(prelast_x);
+        knot_xs.push_back(egocar.x);
+        knot_ys.push_back(prelast_y);
+        knot_ys.push_back(egocar.y);
 
         ref_yaw = deg2rad(egocar.yaw);
     } 
@@ -146,50 +141,49 @@ void TrajectoryGenerator::initial_spline_points(Array2Xd& spline_knots, Vehicle&
         double prelast_x = prev_path.xs[prev_path_size - 2];
         double prelast_y = prev_path.ys[prev_path_size - 2];
 
-        spline_knots(0, 0) = prelast_x;
-        spline_knots(0, 1) = last_x;
-        spline_knots(1, 0) = prelast_y;
-        spline_knots(1, 1) = last_y;
+        knot_xs.push_back(prelast_x);
+        knot_xs.push_back(last_x);
+        knot_ys.push_back(prelast_y);
+        knot_ys.push_back(last_y);
 
         ref_yaw = atan2(last_y - prelast_y, last_x - prelast_x);
     }
 
 }
 
-void TrajectoryGenerator::end_spline_points(Array2Xd& spline_knots, double start_from_s, double target_d)
+void TrajectoryGenerator::end_spline_points(vector<double>& knot_xs, vector<double>& knot_ys, double t_s, double target_v, double target_d)
 {
     // end knot points for the spline
     // pick points in the far distance to
     // have a smooth spline
-    vector<double> end_pt1 = map.get_xy(start_from_s + 30, target_d);
-    vector<double> end_pt2 = map.get_xy(start_from_s + 60, target_d);
-    vector<double> end_pt3 = map.get_xy(start_from_s + 90, target_d);
+    vector<double> end_pt1 = map.get_xy(t_s + 30, target_d);
+    vector<double> end_pt2 = map.get_xy(t_s + 60, target_d);
+    vector<double> end_pt3 = map.get_xy(t_s + 90, target_d);
 
-    //spline_knots already includes the two begining points
-    spline_knots(0, 2) = end_pt1[0];
-    spline_knots(0, 3) = end_pt2[0];
-    spline_knots(0, 4) = end_pt3[0];
+    knot_xs.push_back(end_pt1[0]);
+    knot_xs.push_back(end_pt2[0]);
+    knot_xs.push_back(end_pt3[0]);
 
-    spline_knots(1, 2) = end_pt1[1];
-    spline_knots(1, 3) = end_pt2[1];
-    spline_knots(1, 4) = end_pt3[1];
+    knot_ys.push_back(end_pt1[1]);
+    knot_ys.push_back(end_pt2[1]);
+    knot_ys.push_back(end_pt3[1]);
 
 }
 
-void TrajectoryGenerator::transform_to_local(Array2Xd& spline_knots,  const double ref_x,  const double ref_y, const double ref_yaw)
+void TrajectoryGenerator::transform_to_local(vector<double>& knot_xs, vector<double>& knot_ys, const double ref_x,  const double ref_y, const double ref_yaw)
 {
     // transform the knot points in the ego car's 
     // coordinate system (the beginning point 
     // becomes (0, 0) and the beginnign yaw becomes
     // 0 degrees and the rest of the points are 
     // transformed accordingly)
-    for(int i = 0; i < spline_knots.cols(); ++i)
+    for(int i = 0; i < knot_xs.size(); ++i)
     {
-        double shift_x = spline_knots(0, i) - ref_x;
-        double shift_y = spline_knots(1, i) - ref_y;
+        double shift_x = knot_xs[i] - ref_x;
+        double shift_y = knot_ys[i] - ref_y;
 
-        spline_knots(0, i) = (shift_x * cos(0 - ref_yaw) - shift_y * sin(0 - ref_yaw));
-        spline_knots(1, i) = (shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw));
+        knot_xs[i] = (shift_x * cos(-ref_yaw) - shift_y * sin(-ref_yaw));
+        knot_ys[i] = (shift_x * sin(-ref_yaw) + shift_y * cos(-ref_yaw));
     }
     
 }
