@@ -78,7 +78,7 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
                 // double factor = TOO_CLOSE_GAP / dist;
                 // lane.front_v = min(lane.front_v, MAX_SPEED - factor * (MAX_SPEED - car_speed));
 
-                lane.front_v = MAX_SPEED;
+                lane.front_v = min(lane.front_v, MAX_SPEED);
             }
         }
       
