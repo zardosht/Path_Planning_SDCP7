@@ -2,16 +2,13 @@
 #define TRAJECTORY_GENERATOR_H
 
 #include <vector>
-#include "Eigen-3.3/Eigen/Core"
 #include "behavior_planner.h"
 #include "vehicle.h"
 #include "map.h"
 
 
-
 using std::vector;
 
-using Eigen::Array2Xd;
 
 // how many point to calculate for a trajectory
 const int NUM_TRAJECTORY_POINTS = 50;
@@ -19,26 +16,19 @@ const int NUM_TRAJECTORY_POINTS = 50;
 // threshold to start planning a new trajectory; otherwise consume points from previous trajectory.
 const int PLAN_NEW_TRAJECTORY_THRESHOLD = 50;
 
-// the simulator reachs (consumes) each point of trajectory in TIMESTEP
-const double TIMESTEP = 0.02;
+// the simulator reachs (consumes) each point of trajectory 
+// in 0.02 seconds (in other words 50 points per second)
+const double TIMESTEP = 0.02;   // sec.  
 
-const double MAX_SPEED = 48.5;  // mph
+const double PATH_PLANNING_DURATION = NUM_TRAJECTORY_POINTS * TIMESTEP; // sec.
 
+const double MPH_TO_MS = 0.44704;
 
-// Defines general accleration values
-// The behavior planner only tells if 
-// trajectory generator shoule accelerate, 
-// keep the speed, or deccelrate. 
-// It is the responsibility of the trajectory
-// generator to define proper values for acceleration
-enum Accel 
-{
-    ACCEL, 
-    ZERO, 
-    DECEL
-};
+const double MAX_SPEED = 48.5 * MPH_TO_MS;  // m/s
 
-struct Behavior;
+//const double MAX_ACC = 10;   // m/s^2
+const double MAX_ACC = 7;   // m/s^2
+
 
 struct Trajectory  
 {
@@ -51,6 +41,8 @@ struct Trajectory
     int size() {return xs.size();}
 
 };
+
+struct Behavior;
 
 class TrajectoryGenerator 
 {
@@ -68,23 +60,17 @@ class TrajectoryGenerator
 
     private:
 
-        double get_d(Behavior behavior, Vehicle& egocar); 
+        double target_s(double ego_s, double ego_v, double target_v, double palnning_time = PATH_PLANNING_DURATION);
 
-        int get_accel(Behavior behavior);
+        void initial_spline_points(vector<double>& knot_xs, vector<double>& knot_ys, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
 
-        Trajectory generate_trajectory(Vehicle& egocar, double target_d, int accel, Trajectory& previous_path);
+        void end_spline_points(vector<double>& knot_xs, vector<double>& knot_ys, double t_s, double target_v, double target_d);
 
-        void initial_spline_points(Array2Xd& spline_knots, Vehicle& egocar, Trajectory& prev_path, double& ref_yaw);
-
-        void end_spline_points(Array2Xd& spline_knots, double start_from_s, double target_d);
-
-        void transform_to_local(Array2Xd& spline_knots, const double ref_x, const double ref_y, const double ref_yaw);
+        void transform_to_local(vector<double>& knot_xs, vector<double>& knot_ys, const double ref_x, const double ref_y, const double ref_yaw);
 
         vector<double> transform_to_global(const double x_local, const double y_local, const double ref_x, const double ref_y, const double ref_yaw);
 
         Map& map;
-
-        double vel = 0.0;
 
 };
 

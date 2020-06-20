@@ -1,10 +1,21 @@
 #include <math.h>
-#include<iostream>
+#include <iostream>
+#include <math.h>
 
 #include "prediction.h"
 
 using std::cout;
 using std::endl;
+using std::min;
+using std::max;
+
+
+Prediction::Prediction() 
+{
+    init_lanes();
+}
+
+Prediction::~Prediction() { }
 
 
 void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, Trajectory& prev_path)
@@ -16,17 +27,12 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
         ego_s = prev_path.end_s;
     }  
 
-    too_close = false;
-    dist_front = LARGE_NUMBER;
-
-    car_left = false;
-    dist_front_left = (ego_lane == 0)? -1.0 : LARGE_NUMBER;
- 
-    car_right = false;
-    dist_front_right = (ego_lane == 2)? -1.0 : LARGE_NUMBER;
+    reset_lanes();
 
     for (int i = 0; i < sensor_fusion.size(); ++i)
     {
+        if (sensor_fusion[i][6] < 0) continue;
+
         Vehicle car((int)sensor_fusion[i][0],  //id
                     sensor_fusion[i][1],  //x
                     sensor_fusion[i][2],  //y
@@ -38,34 +44,53 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
         // projection of s value of the car in the future 
         // (i.e. when we would have passed through all the 
         //  points in previous_path)
-        double car_speed = sqrt(car.vx*car.vx + car.vy*car.vy);
-        car.s += (double)prev_path_size * 0.02 * car_speed;
         int car_lane = car.get_lane();
+        double car_speed = sqrt(car.vx*car.vx + car.vy*car.vy);  // m/s
+        car.s += (double)prev_path_size * 0.02 * car_speed; 
   
         // distance from ego car to the car in front of us
         double dist = car.s - ego_s;
-        int lanediff = car_lane - ego_lane; 
-        if (lanediff == 0) {
-            // other car in our lane.
-            too_close |= dist > 0 && dist < TOO_CLOSE_GAP;
-            if (dist > 0 && dist_front > dist) {
-                dist_front = dist;
-            }
-        } else if(lanediff == -1) {
-            // other car in left lane
-            car_left |= LANE_CHANGE_GAP_REAR < dist && dist < LANE_CHANGE_GAP_FRONT;
-            if(dist > 0 && dist_front_left > dist) {
-                dist_front_left = dist;
-            }
-        } else if (lanediff == 1) {
-            // other car in right lane
-            car_right |= LANE_CHANGE_GAP_REAR < dist && dist < LANE_CHANGE_GAP_FRONT;
-            if(dist > 0 && dist_front_right > dist) {
-                dist_front_right = dist;
+        Lane& lane = lanes[car_lane];
+        if(fabs(dist) < TOO_CLOSE_GAP) {
+            lane.blocked = true;
+        }
+        
+        if(dist >= 0) {
+            lane.front_dist = min(lane.front_dist, dist);
+            if (dist < TOO_CLOSE_GAP) {
+                lane.front_v = min(lane.front_v, car_speed);
+            } else {
+                // set the speed relative to distance 
+                // if the car is far away from us 
+                double factor = TOO_CLOSE_GAP / dist;
+                lane.front_v = min(lane.front_v, MAX_SPEED - factor * (MAX_SPEED - car_speed));
             }
         }
+      
     }
 }
 
+void Prediction::init_lanes() 
+{
+    
+    for (int i = 0; i < NUM_LANES; i++) 
+    {
+        Lane lane;
+        lane.id = i;
+        lane.blocked = false;
+        lane.front_dist = PREDICTION_HIROZON;
+        lane.front_v = MAX_SPEED;
+        lanes.push_back(lane);
+    }
+}
 
+void Prediction::reset_lanes() 
+{
+    for (int i = 0; i < NUM_LANES; i++) 
+    {
+        lanes[i].blocked = false;
+        lanes[i].front_dist = PREDICTION_HIROZON;
+        lanes[i].front_v = MAX_SPEED;
+    }
+}
 
