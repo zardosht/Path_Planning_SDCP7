@@ -7,7 +7,7 @@ using std::endl;
 using std::min;
 using std::max;
 
-const double MAX_COST = 500;
+const double MAX_COST = 5000;
 
 BehaviorPlanner::BehaviorPlanner()
 {
@@ -29,9 +29,11 @@ BehaviorPlanner::BehaviorPlanner()
     clr.cost = MAX_COST;
     behaviors.push_back(clr);
 
+    current_behavior = kl;
     previous_lane = 1; // the car starts at lane 1
     current_lane = 1;
     lane_changed = false;
+    return_keep_lane = 0;
 
 }
 
@@ -40,6 +42,10 @@ BehaviorPlanner::~BehaviorPlanner() {}
 Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, Prediction& pred) 
 {
 
+    cout << "\nego_lane = " << egocar.get_lane() << endl;
+    cout << "current_behavior = "  << current_behavior.name << endl;
+    cout << "previous_lane = " << previous_lane << endl;
+
     current_lane = egocar.get_lane();
     if(current_lane != previous_lane) {
         lane_changed = true;
@@ -47,6 +53,10 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
     } else {
         lane_changed = false;
     }
+    
+    cout << "current_lane = " <<  current_lane << endl;
+    cout << "lane_changed = " << lane_changed << endl;
+    cout << pred;
 
     if (egocar.speed < 10) {
         Behavior& kl = behaviors[0];  // keep lane
@@ -54,25 +64,37 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
         best_behavior = kl;
 
     } else {
-        cout << "\nego_lane = " << egocar.get_lane() << endl;
-        cout << pred;
 
-        int ego_lane = egocar.get_lane();
         update_costs(pred, egocar);
 
         cout << "***** KeepLane.cost = " << behaviors[0].cost << endl;
         cout << "***** ChangeLaneLeft.cost = " << behaviors[1].cost << endl;
         cout << "***** ChangeLaneRight.cost = " << behaviors[2].cost << endl;
-        cout << "*********************************** best: " << best_behavior.name << endl;
+    }
+
+    // if started a lane change, continue it till finished
+    if (current_behavior.name.compare(KeepLane) != 0) {
+        if(best_behavior.name.compare(KeepLane) == 0 && lane_changed != true) {
+            best_behavior = current_behavior;
+        }
     }
 
 
-    if(previous_behaviors.size() > 40) {
-        previous_behaviors.clear();
+    // if a lane change finished and then best behavior is keep lane, then return it 50 times
+    // (to make lane changes more stable)
+    cout << "return_keep_lane = " << return_keep_lane << endl;
+    if (current_behavior.name.compare(KeepLane) != 0 && best_behavior.name.compare(KeepLane) == 0) {
+        return_keep_lane = 1;
     }
+    if(return_keep_lane > 0 && return_keep_lane < 50) {
+        best_behavior = behaviors[0]; // keep lane
+        ++return_keep_lane;
+    }else {
+        return_keep_lane = 0;
+    }
+    cout << "*********************************** best: " << best_behavior.name << endl;
 
     current_behavior = best_behavior;
-    previous_behaviors.push_back(best_behavior.id);
     return best_behavior;
      
 }
@@ -112,16 +134,23 @@ double BehaviorPlanner::transition_cost(Behavior& b)
     if (current_behavior.name.compare(ChangeLaneLeft) == 0) {
         // previous behavior was ChangeLaneLeft
         if (b.name.compare(ChangeLaneRight) == 0) {
-            return 100;
+            return 800.0;
         }
     } else if (current_behavior.name.compare(ChangeLaneRight) == 0) {
         // previous behavior was ChangeLaneRight
         if (b.name.compare(ChangeLaneLeft) == 0) {
-            return 100;
+            return 800.0;
         }
-    } else {
-        return 0;
-    }
+    } 
+    
+    if (lane_changed && b.name.compare(KeepLane) == 0) {
+        // favor keep the lane after a lane change
+        // for at least 40 behavior steps
+        return -10.0;
+    } 
+    
+    return 0.0;
+    
 }
 
 

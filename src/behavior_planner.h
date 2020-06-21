@@ -61,7 +61,8 @@ class BehaviorPlanner {
         double transition_cost(Behavior& b);
         
         Behavior best_behavior;
-        vector<int> previous_behaviors;
+       
+        int return_keep_lane; 
         
         int previous_lane;
         int current_lane;
