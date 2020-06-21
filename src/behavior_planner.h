@@ -26,6 +26,7 @@ struct Behavior {
         Behavior(int lane_shift);
         ~Behavior();
 
+        int id;
         string name;
         double cost;
         double target_v;
@@ -49,7 +50,7 @@ class BehaviorPlanner {
         Behavior next_behavior(Vehicle& egocar, Trajectory& prev_path, Prediction& pred);
 
         vector<Behavior> behaviors; 
-        Behavior best_behavior;
+        Behavior current_behavior;
         
     
     private: 
@@ -58,6 +59,15 @@ class BehaviorPlanner {
         double distance_cost(Behavior& behavior, Vehicle& egocar, Prediction& pred);
         double lane_change_cost(Behavior& b, Vehicle& egocar, Prediction& pred);
         double transition_cost(Behavior& b);
+        
+        Behavior best_behavior;
+        vector<int> previous_behaviors;
+        
+        int previous_lane;
+        int current_lane;
+        bool lane_changed;
+
+
        
 }; 
 

@@ -12,19 +12,26 @@ const double MAX_COST = 500;
 BehaviorPlanner::BehaviorPlanner()
 {
     Behavior kl(0);
+    kl.id = 0;
     kl.name = KeepLane;
     kl.cost = MAX_COST;
     behaviors.push_back(kl);
 
     Behavior cll(-1);
+    cll.id = 1;
     cll.name = ChangeLaneLeft;
     cll.cost = MAX_COST;
     behaviors.push_back(cll);
 
     Behavior clr(1);
+    clr.id = 2;
     clr.name = ChangeLaneRight;
     clr.cost = MAX_COST;
     behaviors.push_back(clr);
+
+    previous_lane = 1; // the car starts at lane 1
+    current_lane = 1;
+    lane_changed = false;
 
 }
 
@@ -33,24 +40,39 @@ BehaviorPlanner::~BehaviorPlanner() {}
 Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, Prediction& pred) 
 {
 
+    current_lane = egocar.get_lane();
+    if(current_lane != previous_lane) {
+        lane_changed = true;
+        previous_lane = current_lane;
+    } else {
+        lane_changed = false;
+    }
+
     if (egocar.speed < 10) {
         Behavior& kl = behaviors[0];  // keep lane
         kl.target_v = 20;   // m/s
         best_behavior = kl;
-        return best_behavior;
+
+    } else {
+        cout << "\nego_lane = " << egocar.get_lane() << endl;
+        cout << pred;
+
+        int ego_lane = egocar.get_lane();
+        update_costs(pred, egocar);
+
+        cout << "***** KeepLane.cost = " << behaviors[0].cost << endl;
+        cout << "***** ChangeLaneLeft.cost = " << behaviors[1].cost << endl;
+        cout << "***** ChangeLaneRight.cost = " << behaviors[2].cost << endl;
+        cout << "*********************************** best: " << best_behavior.name << endl;
     }
 
-    cout << "\nego_lane = " << egocar.get_lane() << endl;
-    cout << pred;
 
-    int ego_lane = egocar.get_lane();
-    update_costs(pred, egocar);
+    if(previous_behaviors.size() > 40) {
+        previous_behaviors.clear();
+    }
 
-    cout << "***** KeepLane.cost = " << behaviors[0].cost << endl;
-    cout << "***** ChangeLaneLeft.cost = " << behaviors[1].cost << endl;
-    cout << "***** ChangeLaneRight.cost = " << behaviors[2].cost << endl;
-    cout << "*********************************** best: " << best_behavior.name << endl;
-
+    current_behavior = best_behavior;
+    previous_behaviors.push_back(best_behavior.id);
     return best_behavior;
      
 }
@@ -87,12 +109,12 @@ double BehaviorPlanner::transition_cost(Behavior& b)
 {
     // Prevent immedate lane change in the opposite direction.
     // The driving more robust and prevents "dancing" car when undecided
-    if (best_behavior.name.compare(ChangeLaneLeft) == 0) {
+    if (current_behavior.name.compare(ChangeLaneLeft) == 0) {
         // previous behavior was ChangeLaneLeft
         if (b.name.compare(ChangeLaneRight) == 0) {
             return 100;
         }
-    } else if (best_behavior.name.compare(ChangeLaneRight) == 0) {
+    } else if (current_behavior.name.compare(ChangeLaneRight) == 0) {
         // previous behavior was ChangeLaneRight
         if (b.name.compare(ChangeLaneLeft) == 0) {
             return 100;
