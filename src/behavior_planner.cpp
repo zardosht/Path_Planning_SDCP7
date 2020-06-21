@@ -65,7 +65,8 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
         double cost_dist = distance_cost(b, egocar, pred);
         double cost_v = speed_cost(b, egocar, pred);
         double cost_lane_change = lane_change_cost(b, egocar, pred);
-        b.cost = cost_v + cost_dist + cost_lane_change;
+        double cost_transition = transition_cost(b);
+        b.cost = cost_v + cost_dist + cost_lane_change + cost_transition;
         if (b.cost < min_cost) {
             best_behavior = b;
             min_cost = b.cost;
@@ -78,6 +79,26 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
         // kl.target_v is already set in speed_cost()
         kl.cost = 0;
         best_behavior = kl;
+    }
+}
+
+
+double BehaviorPlanner::transition_cost(Behavior& b)
+{
+    // Prevent immedate lane change in the opposite direction.
+    // The driving more robust and prevents "dancing" car when undecided
+    if (best_behavior.name.compare(ChangeLaneLeft)) {
+        // previous behavior was ChangeLaneLeft
+        if (b.name.compare(ChangeLaneRight) == 0) {
+            return 100;
+        }
+    } else if (best_behavior.name.compare(ChangeLaneRight)) {
+        // previous behavior was ChangeLaneRight
+        if (b.name.compare(ChangeLaneLeft) == 0) {
+            return 100;
+        }
+    } else {
+        return 0;
     }
 }
 
