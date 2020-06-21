@@ -11,8 +11,12 @@ using std::vector;
 
 struct Trajectory;
 
-const double TOO_CLOSE_GAP = 30; // m
-const double LANE_CHANGE_GAP_FRONT = 35;  // m
+// const double TOO_CLOSE_GAP = 30; // m
+const double TOO_CLOSE_GAP = 40; // m
+
+// const double LANE_CHANGE_GAP_FRONT = 35;  // m
+const double LANE_CHANGE_GAP_FRONT = 25;  // m
+
 const double LANE_CHANGE_GAP_REAR = -10;   // m
 
 const int NUM_LANES = 3;
