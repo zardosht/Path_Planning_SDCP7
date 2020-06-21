@@ -87,12 +87,12 @@ double BehaviorPlanner::transition_cost(Behavior& b)
 {
     // Prevent immedate lane change in the opposite direction.
     // The driving more robust and prevents "dancing" car when undecided
-    if (best_behavior.name.compare(ChangeLaneLeft)) {
+    if (best_behavior.name.compare(ChangeLaneLeft) == 0) {
         // previous behavior was ChangeLaneLeft
         if (b.name.compare(ChangeLaneRight) == 0) {
             return 100;
         }
-    } else if (best_behavior.name.compare(ChangeLaneRight)) {
+    } else if (best_behavior.name.compare(ChangeLaneRight) == 0) {
         // previous behavior was ChangeLaneRight
         if (b.name.compare(ChangeLaneLeft) == 0) {
             return 100;
