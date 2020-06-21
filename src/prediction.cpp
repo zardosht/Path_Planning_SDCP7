@@ -52,12 +52,16 @@ void Prediction::update(vector<vector<double>>& sensor_fusion, Vehicle& egocar, 
         double dist = car.s - ego_s;
         Lane& lane = lanes[car_lane];
 
+        double delta_v = egocar.speed - car_speed;
+        double adapted_lcgap_f = LANE_CHANGE_GAP_FRONT + delta_v;
+        double adapted_lcgap_r = min(LANE_CHANGE_GAP_REAR + delta_v, -7.0);
+        
         if (lane.id == ego_lane) {
             if(dist >= 0 && dist < TOO_CLOSE_GAP) {
                 lane.blocked = true;
             }
         } else {
-            if (LANE_CHANGE_GAP_REAR < dist && dist < LANE_CHANGE_GAP_FRONT) {
+            if (adapted_lcgap_r < dist && dist < adapted_lcgap_f) {
                 lane.blocked = true;
             }
         }
