@@ -3,7 +3,7 @@
 
 #### Motion Planning
 
-The goal of this project is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. The car's localization and sensor fusion data will be provided by the simulator. A map file is given with a sparse map list of waypoints around the highway. The solution should meet the following criteria: 
+The goal of this project is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. The car's localization and sensor fusion data will be provided by the [simulator](https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2). A map file is given with a sparse map list of waypoints around the highway. The solution should meet the following criteria: 
 
 * The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. 
 * The car should avoid hitting other cars at all cost. 
