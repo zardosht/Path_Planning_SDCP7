@@ -32,7 +32,7 @@ The method `get_frenet()` and `get_xy()` can be used to convert from `(x, y)` co
 ## Prediction
 The `Prediciton` struct takes the sensor fusion input and localization data of the AV from the simulator and calculated the current state of the highway. The highway consists of three lane. For each lane the `Prediction` struct maintains the state in an instance of `Lane` struct. The `Lane` struct contains id of the lane, the distance to the front vehicle in the lane and if the lane is blocked. 
 
-```lang=C++
+```cpp
 struct Lane 
 {
     int id;
