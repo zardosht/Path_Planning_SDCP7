@@ -50,7 +50,6 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
     // transform spline knots into local coordinates
     transform_to_local(knot_xs, knot_ys, ref_x, ref_y, ref_yaw);
 
-    // prepare spline
    // prepare spline
     tk::spline spl;
     spl.set_points(knot_xs, knot_ys);
@@ -65,7 +64,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
     // add the rest points to trajectory (get the xs by 
     // considering the speed and acceleration, get the ys from 
     // spline, transform back the x and y into global coordinates
-    // add the x and y to trajectory)
+    // and add the transformed x and y to trajectory)
 
     // Define how far to go in the x direction.
     // We uniformly divide this distance into N points.
@@ -81,7 +80,6 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
     // by the (speed * time_step). 
 
 
-    //double ego_v = (egocar.speed == 0)? 5 : egocar.speed;
     cout << "*** egocar.speed=" << egocar.speed << endl;
     if (target_v > ego_v) {
         //accelerate

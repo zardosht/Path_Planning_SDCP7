@@ -104,6 +104,7 @@ int main() {
           Vehicle ego_car(EGOCAR_ID, car_x, car_y, car_s, car_d, car_yaw);
           ego_car.speed = car_speed * MPH_TO_MS; // m/s
 
+          // update predictions; find a best behavior; generate trajectory for behavior
           pred.update(sensor_fusion, ego_car, previous_path);
           Behavior behavior = bp.next_behavior(ego_car, previous_path, pred);
           Trajectory trajectory = tg.generate_trajectory(behavior, ego_car, previous_path);

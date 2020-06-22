@@ -72,8 +72,11 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
         cout << "***** ChangeLaneRight.cost = " << behaviors[2].cost << endl;
     }
 
-    // if started a lane change, continue it till finished
+    // if started a lane change, continue till it's finished
     if (current_behavior.name.compare(KeepLane) != 0) {
+        // prevent the case for oscilating between keep lane and lane change
+        // the other case for oscilating between opposite lane change behaviors
+        // is taken care of in transition_cost (todo: move this check also to transitioin_cost)
         if(best_behavior.name.compare(KeepLane) == 0 && lane_changed != true) {
             best_behavior = current_behavior;
         }
@@ -119,8 +122,7 @@ void BehaviorPlanner::update_costs(Prediction& pred, Vehicle& egocar)
 
     if (pred.all_lanes_blocked) 
     {
-        Behavior& kl = behaviors[0];  // keep lane
-        // kl.target_v is already set in speed_cost()
+        Behavior& kl = behaviors[0];  // keep lane. kl.target_v is already set in speed_cost()
         kl.cost = 0;
         best_behavior = kl;
     }
