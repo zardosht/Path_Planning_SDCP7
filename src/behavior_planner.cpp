@@ -89,7 +89,7 @@ Behavior BehaviorPlanner::next_behavior(Vehicle& egocar, Trajectory& prev_path, 
     if (current_behavior.name.compare(KeepLane) != 0 && best_behavior.name.compare(KeepLane) == 0) {
         return_keep_lane = 1;
     }
-    if(return_keep_lane > 0 && return_keep_lane < 50) {
+    if(return_keep_lane > 0 && return_keep_lane < KEEP_LANE_AFTER_LANE_CHANGE) {
         best_behavior = behaviors[0]; // keep lane
         ++return_keep_lane;
     }else {

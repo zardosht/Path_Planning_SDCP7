@@ -19,6 +19,8 @@ const string KeepLane = "KeepLane";
 const string ChangeLaneRight = "ChangeLaneRight";  
 const string ChangeLaneLeft = "ChangeLaneLeft";    
 
+const int KEEP_LANE_AFTER_LANE_CHANGE = 50;
+
 
 struct Behavior {
     public: 
