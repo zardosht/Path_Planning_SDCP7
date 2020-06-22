@@ -94,6 +94,7 @@ Trajectory TrajectoryGenerator::generate_trajectory(Behavior& behavior, Vehicle&
     double target_y = spl(target_x);
     double target_dist = sqrt(target_x * target_x + target_y * target_y);
     double num_points = target_dist / (TIMESTEP * ego_v);
+    double distance_between_points = target_x / num_points;
 
     double x_add_on = 0.0;
     for(int i = 1; i <= NUM_TRAJECTORY_POINTS - prev_path_size; i++) 
